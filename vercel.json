@@ -1,0 +1,8 @@
+{
+  "version": 2,
+  "rewrites": [
+    { "source": "/", "destination": "/public/index.html" },
+    { "source": "/panel", "destination": "/public/panel.html" },
+    { "source": "/admin", "destination": "/public/admin.html" }
+  ]
+}

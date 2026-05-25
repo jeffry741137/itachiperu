@@ -1,0 +1,12 @@
+{
+  "name": "itachiperu",
+  "version": "1.0.0",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "imap": "^0.8.19",
+    "jsonwebtoken": "^9.0.2",
+    "mailparser": "^3.6.5",
+    "pg": "^8.11.3"
+  },
+  "engines": { "node": ">=18" }
+}
