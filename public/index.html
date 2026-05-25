@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ItachiPeru — Códigos de Streaming</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --pink: #ff2d78;
+  --purple: #7c3aed;
+  --cyan: #00d4ff;
+  --bg: #040408;
+  --bg2: #0a0812;
+  --card: rgba(255,255,255,0.03);
+  --border: rgba(255,255,255,0.07);
+  --text: #f0e8ff;
+  --muted: #7a6a8a;
+  --vendor-color: #ff2d78;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;min-height:100vh;overflow-x:hidden;}
+
+/* BG EFFECTS */
+.bg-mesh{position:fixed;inset:0;z-index:0;pointer-events:none;}
+.bg-mesh::before{content:'';position:absolute;top:-20%;left:-10%;width:60%;height:60%;background:radial-gradient(ellipse,rgba(124,58,237,0.15) 0%,transparent 70%);animation:pulse1 8s ease-in-out infinite;}
+.bg-mesh::after{content:'';position:absolute;bottom:-20%;right:-10%;width:50%;height:50%;background:radial-gradient(ellipse,rgba(255,45,120,0.12) 0%,transparent 70%);animation:pulse2 10s ease-in-out infinite;}
+@keyframes pulse1{0%,100%{transform:scale(1) translate(0,0);}50%{transform:scale(1.1) translate(5%,3%);}}
+@keyframes pulse2{0%,100%{transform:scale(1) translate(0,0);}50%{transform:scale(1.15) translate(-3%,-5%);}}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 32px;display:flex;align-items:center;justify-content:space-between;background:rgba(4,4,8,0.8);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
+.nav-logo{font-size:20px;font-weight:800;background:linear-gradient(135deg,var(--pink),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.nav-vendor{display:flex;align-items:center;gap:12px;}
+.vendor-avatar{width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid var(--vendor-color);}
+.vendor-avatar-placeholder{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--vendor-color),var(--purple));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#fff;}
+.vendor-info{display:flex;flex-direction:column;}
+.vendor-name{font-size:13px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:0.05em;}
+.vendor-badge{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--vendor-color);}
+.vendor-badge svg{width:12px;height:12px;}
+.nav-links{display:flex;gap:28px;}
+.nav-links a{font-size:14px;color:var(--muted);text-decoration:none;transition:color .2s;}
+.nav-links a:hover{color:var(--text);}
+.nav-status{display:flex;align-items:center;gap:6px;font-size:12px;color:#00e5a0;}
+.status-dot{width:6px;height:6px;border-radius:50%;background:#00e5a0;animation:blink 2s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
+
+/* HERO */
+.hero{position:relative;z-index:1;min-height:100vh;display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:60px;padding:120px 80px 80px;max-width:1400px;margin:0 auto;}
+.hero-left{}
+.hero-tag{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;background:rgba(255,45,120,0.08);border:1px solid rgba(255,45,120,0.2);border-radius:100px;font-size:12px;font-weight:600;color:var(--pink);margin-bottom:24px;text-transform:uppercase;letter-spacing:0.1em;}
+.hero-title{font-size:clamp(36px,5vw,64px);font-weight:900;line-height:1.05;margin-bottom:20px;}
+.hero-title span{background:linear-gradient(135deg,var(--pink),var(--purple),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.hero-sub{font-size:18px;color:var(--muted);line-height:1.6;margin-bottom:40px;font-weight:400;}
+.hero-badges{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:40px;}
+.badge{display:flex;align-items:center;gap:8px;padding:8px 16px;background:var(--card);border:1px solid var(--border);border-radius:100px;font-size:13px;font-weight:500;}
+.badge-icon{font-size:16px;}
+.btn-start{display:inline-flex;align-items:center;gap:10px;padding:16px 36px;background:linear-gradient(135deg,var(--pink),var(--purple));border:none;border-radius:14px;font-size:16px;font-weight:700;color:#fff;cursor:pointer;transition:all .3s;font-family:'Outfit',sans-serif;}
+.btn-start:hover{transform:translateY(-2px);box-shadow:0 20px 60px rgba(255,45,120,0.4);}
+
+/* WIZARD CARD */
+.hero-right{}
+.wizard-card{background:rgba(10,8,18,0.95);border:1px solid var(--border);border-radius:24px;padding:32px;backdrop-filter:blur(20px);box-shadow:0 40px 120px rgba(0,0,0,0.6);}
+.wizard-steps{display:flex;align-items:center;gap:0;margin-bottom:32px;}
+.step-item{display:flex;align-items:center;gap:8px;flex:1;}
+.step-circle{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;transition:all .3s;}
+.step-circle.active{background:linear-gradient(135deg,var(--pink),var(--purple));color:#fff;}
+.step-circle.done{background:rgba(0,229,160,0.15);border:1.5px solid #00e5a0;color:#00e5a0;}
+.step-circle.pending{background:rgba(255,255,255,0.05);border:1.5px solid var(--border);color:var(--muted);}
+.step-label{font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.step-label.active{color:var(--text);}
+.step-label.done{color:#00e5a0;}
+.step-label.pending{color:var(--muted);}
+.step-line{flex:1;height:1px;background:var(--border);margin:0 6px;min-width:12px;}
+.step-line.done{background:rgba(0,229,160,0.3);}
+
+/* STEP CONTENT */
+.step-content{display:none;animation:fadeIn .3s ease;}
+.step-content.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.step-title{font-size:18px;font-weight:700;margin-bottom:6px;}
+.step-sub{font-size:13px;color:var(--muted);margin-bottom:24px;}
+
+/* SERVICE CARDS */
+.services-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px;}
+.service-card{background:rgba(255,255,255,0.03);border:2px solid var(--border);border-radius:16px;padding:20px;cursor:pointer;transition:all .3s;text-align:center;}
+.service-card:hover{border-color:rgba(255,45,120,0.4);background:rgba(255,45,120,0.05);}
+.service-card.selected{border-color:var(--pink);background:rgba(255,45,120,0.08);}
+.service-card.selected .service-check{opacity:1;}
+.service-logo{font-size:32px;margin-bottom:8px;}
+.service-name{font-size:14px;font-weight:700;}
+.service-desc{font-size:11px;color:var(--muted);margin-top:4px;}
+.service-check{width:20px;height:20px;background:var(--pink);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:8px auto 0;opacity:0;transition:opacity .2s;}
+.service-check::after{content:'✓';color:#fff;font-size:12px;font-weight:700;}
+
+/* TYPE CARDS */
+.type-list{display:flex;flex-direction:column;gap:10px;margin-bottom:24px;}
+.type-card{background:rgba(255,255,255,0.03);border:2px solid var(--border);border-radius:14px;padding:16px 20px;cursor:pointer;transition:all .3s;display:flex;align-items:center;gap:16px;}
+.type-card:hover{border-color:rgba(255,45,120,0.4);background:rgba(255,45,120,0.05);}
+.type-card.selected{border-color:var(--pink);background:rgba(255,45,120,0.08);}
+.type-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.type-icon.hogar{background:rgba(255,45,120,0.12);}
+.type-icon.login{background:rgba(124,58,237,0.12);}
+.type-icon.pass{background:rgba(255,165,0,0.12);}
+.type-info{flex:1;}
+.type-name{font-size:14px;font-weight:700;margin-bottom:2px;}
+.type-desc{font-size:12px;color:var(--muted);}
+.type-radio{width:18px;height:18px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;transition:all .3s;}
+.type-card.selected .type-radio{border-color:var(--pink);background:var(--pink);}
+
+/* INPUT */
+.input-group{margin-bottom:20px;}
+.input-label{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;display:block;}
+.input-wrap{position:relative;}
+.input-wrap svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--muted);}
+input[type=text],input[type=email]{width:100%;padding:13px 16px 13px 42px;background:rgba(255,255,255,0.04);border:1.5px solid var(--border);border-radius:12px;font-size:14px;color:var(--text);outline:none;transition:border-color .2s;font-family:'Outfit',sans-serif;}
+input[type=text]:focus,input[type=email]:focus{border-color:var(--pink);}
+.input-hint{font-size:11px;color:var(--muted);margin-top:6px;display:flex;align-items:center;gap:6px;}
+
+/* RESULT */
+.result-box{text-align:center;padding:20px 0;}
+.result-icon{font-size:48px;margin-bottom:16px;}
+.result-title{font-size:20px;font-weight:700;margin-bottom:8px;}
+.result-sub{font-size:13px;color:var(--muted);margin-bottom:24px;}
+.code-display{background:rgba(255,45,120,0.06);border:1.5px solid rgba(255,45,120,0.2);border-radius:16px;padding:24px;margin-bottom:20px;}
+.code-label{font-size:11px;font-weight:700;color:var(--pink);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:12px;}
+.code-digits{display:flex;justify-content:center;gap:8px;margin-bottom:12px;}
+.code-digit{width:52px;height:64px;background:rgba(255,255,255,0.05);border:1.5px solid var(--border);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;color:var(--pink);}
+.code-link{font-size:13px;color:var(--cyan);word-break:break-all;font-weight:500;}
+.code-timer{display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;color:var(--muted);}
+.btn-copy{width:100%;padding:14px;background:linear-gradient(135deg,var(--pink),var(--purple));border:none;border-radius:12px;font-size:15px;font-weight:700;color:#fff;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .3s;margin-bottom:10px;}
+.btn-copy:hover{opacity:.9;}
+.btn-retry{width:100%;padding:12px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:12px;font-size:14px;font-weight:600;color:var(--muted);cursor:pointer;font-family:'Outfit',sans-serif;transition:all .3s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-retry:hover{border-color:rgba(255,45,120,0.3);color:var(--text);}
+.how-to{background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-top:16px;font-size:12px;color:var(--muted);}
+.how-to strong{color:var(--text);display:flex;align-items:center;gap:6px;margin-bottom:6px;font-size:13px;}
+
+/* WIZARD NAV */
+.wizard-nav{display:flex;gap:10px;margin-top:8px;}
+.btn-back{flex:0 0 auto;padding:12px 20px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:12px;font-size:14px;font-weight:600;color:var(--muted);cursor:pointer;font-family:'Outfit',sans-serif;transition:all .2s;}
+.btn-back:hover{color:var(--text);}
+.btn-next{flex:1;padding:14px;background:linear-gradient(135deg,var(--pink),var(--purple));border:none;border-radius:12px;font-size:15px;font-weight:700;color:#fff;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .3s;}
+.btn-next:hover{opacity:.9;}
+.btn-next:disabled{opacity:0.4;cursor:not-allowed;}
+
+/* LOADING */
+.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;gap:16px;}
+.spinner{width:40px;height:40px;border:3px solid rgba(255,45,120,0.2);border-top-color:var(--pink);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading-text{font-size:14px;color:var(--muted);}
+
+/* ERROR */
+.error-box{background:rgba(229,9,20,0.06);border:1px solid rgba(229,9,20,0.2);border-radius:12px;padding:14px 16px;font-size:13px;color:#ff6b6b;display:flex;align-items:center;gap:10px;margin-top:12px;}
+
+/* SECTIONS */
+section{position:relative;z-index:1;padding:80px 80px;max-width:1400px;margin:0 auto;}
+.section-tag{display:inline-block;padding:5px 14px;background:rgba(255,45,120,0.08);border:1px solid rgba(255,45,120,0.2);border-radius:100px;font-size:11px;font-weight:700;color:var(--pink);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:16px;}
+.section-title{font-size:clamp(28px,4vw,44px);font-weight:800;margin-bottom:16px;}
+.section-sub{font-size:16px;color:var(--muted);max-width:600px;}
+
+/* SERVICES SECTION */
+.services-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px;margin-top:48px;}
+.svc-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:32px;transition:all .3s;}
+.svc-card:hover{border-color:rgba(255,45,120,0.3);transform:translateY(-4px);}
+.svc-logo-big{font-size:48px;margin-bottom:20px;}
+.svc-name{font-size:22px;font-weight:800;margin-bottom:8px;}
+.svc-desc{font-size:14px;color:var(--muted);margin-bottom:20px;line-height:1.6;}
+.svc-features{display:flex;flex-direction:column;gap:8px;margin-bottom:24px;}
+.svc-feature{display:flex;align-items:center;gap:10px;font-size:13px;}
+.svc-feature::before{content:'•';color:var(--pink);font-size:18px;line-height:1;}
+.btn-select{width:100%;padding:13px;background:rgba(255,45,120,0.08);border:1.5px solid rgba(255,45,120,0.3);border-radius:12px;font-size:14px;font-weight:700;color:var(--pink);cursor:pointer;font-family:'Outfit',sans-serif;transition:all .3s;}
+.btn-select:hover{background:rgba(255,45,120,0.15);}
+
+/* HOW IT WORKS */
+.steps-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:48px;}
+.step-card{text-align:center;padding:32px 20px;}
+.step-num{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,rgba(255,45,120,0.15),rgba(124,58,237,0.15));border:1px solid rgba(255,45,120,0.2);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:var(--pink);margin:0 auto 20px;}
+.step-card-title{font-size:16px;font-weight:700;margin-bottom:8px;}
+.step-card-desc{font-size:13px;color:var(--muted);line-height:1.6;}
+
+/* WHY US */
+.why-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;margin-top:48px;}
+.why-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;}
+.why-icon{font-size:28px;margin-bottom:14px;}
+.why-title{font-size:15px;font-weight:700;margin-bottom:6px;}
+.why-desc{font-size:13px;color:var(--muted);line-height:1.5;}
+
+/* CONTACT */
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:48px;}
+.contact-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;display:flex;align-items:center;gap:20px;transition:all .3s;text-decoration:none;color:inherit;}
+.contact-card:hover{border-color:rgba(255,45,120,0.3);transform:translateY(-2px);}
+.contact-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;}
+.contact-icon.wa{background:rgba(37,211,102,0.12);}
+.contact-icon.mail{background:rgba(255,45,120,0.12);}
+.contact-info{}
+.contact-name{font-size:15px;font-weight:700;margin-bottom:4px;}
+.contact-desc{font-size:13px;color:var(--muted);}
+.contact-btn{margin-left:auto;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;border:none;font-family:'Outfit',sans-serif;}
+.contact-btn.wa{background:rgba(37,211,102,0.12);color:#25d366;border:1px solid rgba(37,211,102,0.2);}
+.contact-btn.mail{background:rgba(255,45,120,0.08);color:var(--pink);border:1px solid rgba(255,45,120,0.2);}
+.hours-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;margin-top:24px;}
+.hours-title{font-size:15px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+.hours-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.hours-row:last-child{border:none;}
+.hours-day{color:var(--muted);}
+.hours-time{font-weight:600;}
+
+/* FOOTER */
+footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:32px 80px;display:flex;align-items:center;justify-content:space-between;}
+.footer-logo{font-size:16px;font-weight:800;background:linear-gradient(135deg,var(--pink),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.footer-copy{font-size:12px;color:var(--muted);}
+.footer-socials{display:flex;gap:12px;}
+.social-btn{width:36px;height:36px;border-radius:10px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;transition:all .2s;text-decoration:none;}
+.social-btn:hover{border-color:rgba(255,45,120,0.3);}
+
+/* PAYMENT BADGES */
+.payment-logos{display:flex;align-items:center;gap:16px;margin-top:48px;flex-wrap:wrap;}
+.payment-badge{padding:8px 16px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;font-size:12px;font-weight:700;color:var(--muted);}
+
+@media(max-width:900px){
+  .hero{grid-template-columns:1fr;padding:100px 24px 60px;}
+  .hero-right{display:none;}
+  section{padding:60px 24px;}
+  .steps-grid{grid-template-columns:1fr 1fr;}
+  .contact-grid{grid-template-columns:1fr;}
+  footer{flex-direction:column;gap:16px;padding:24px;text-align:center;}
+  nav{padding:12px 20px;}
+  .nav-links{display:none;}
+}
+</style>
+</head>
+<body>
+<div class="bg-mesh"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">ItachiPeru</div>
+  <div class="nav-links">
+    <a href="#inicio">Inicio</a>
+    <a href="#servicios">Servicios</a>
+    <a href="#como-funciona">¿Cómo funciona?</a>
+    <a href="#contacto">Contacto</a>
+  </div>
+  <div id="vendorInfo" class="nav-vendor" style="display:none">
+    <div id="vendorAvatar" class="vendor-avatar-placeholder"></div>
+    <div class="vendor-info">
+      <span id="vendorName" class="vendor-name"></span>
+      <div class="vendor-badge">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        Verificado
+      </div>
+    </div>
+  </div>
+  <div class="nav-status"><div class="status-dot"></div>En línea</div>
+</nav>
+
+<!-- HERO -->
+<div id="inicio" style="position:relative;z-index:1;">
+<div class="hero">
+  <div class="hero-left">
+    <div class="hero-tag">🔥 Plataforma Oficial</div>
+    <h1 class="hero-title">Obtén tu código<br>de <span>streaming</span></h1>
+    <p class="hero-sub">Rápido, seguro y al instante.<br>Netflix y Disney+ en segundos.</p>
+    <div class="hero-badges">
+      <div class="badge"><span class="badge-icon">🛡️</span>100% Seguro</div>
+      <div class="badge"><span class="badge-icon">⚡</span>Entrega inmediata</div>
+      <div class="badge"><span class="badge-icon">💬</span>Soporte 24/7</div>
+    </div>
+    <button class="btn-start" onclick="document.querySelector('.wizard-card').scrollIntoView({behavior:'smooth'});startWizard()">
+      Comenzar ahora →
+    </button>
+    <div class="payment-logos">
+      <div class="payment-badge">🏦 BCP</div>
+      <div class="payment-badge">💜 Yape</div>
+      <div class="payment-badge">💙 Plin</div>
+      <div class="payment-badge">💳 VISA</div>
+      <div class="payment-badge">💳 Mastercard</div>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="wizard-card">
+      <!-- STEPS INDICATOR -->
+      <div class="wizard-steps" id="wizardSteps">
+        <div class="step-item">
+          <div class="step-circle active" id="sc1">1</div>
+          <span class="step-label active" id="sl1">Servicio</span>
+        </div>
+        <div class="step-line" id="line1"></div>
+        <div class="step-item">
+          <div class="step-circle pending" id="sc2">2</div>
+          <span class="step-label pending" id="sl2">Código</span>
+        </div>
+        <div class="step-line" id="line2"></div>
+        <div class="step-item">
+          <div class="step-circle pending" id="sc3">3</div>
+          <span class="step-label pending" id="sl3">Correo</span>
+        </div>
+        <div class="step-line" id="line3"></div>
+        <div class="step-item">
+          <div class="step-circle pending" id="sc4">4</div>
+          <span class="step-label pending" id="sl4">Resultado</span>
+        </div>
+      </div>
+
+      <!-- STEP 1: SERVICE -->
+      <div class="step-content active" id="step1">
+        <div class="step-title">1. Elige tu servicio</div>
+        <div class="step-sub">Selecciona la plataforma de streaming</div>
+        <div class="services-grid">
+          <div class="service-card" id="svc-netflix" onclick="selectService('netflix')">
+            <div class="service-logo">N</div>
+            <div class="service-name">Netflix</div>
+            <div class="service-desc">Códigos de acceso</div>
+            <div class="service-check"></div>
+          </div>
+          <div class="service-card" id="svc-disney" onclick="selectService('disney')">
+            <div class="service-logo">D+</div>
+            <div class="service-name">Disney+</div>
+            <div class="service-desc">Códigos de acceso</div>
+            <div class="service-check"></div>
+          </div>
+        </div>
+        <div class="wizard-nav">
+          <button class="btn-next" id="btn1" onclick="goStep(2)" disabled>Continuar →</button>
+        </div>
+      </div>
+
+      <!-- STEP 2: TYPE -->
+      <div class="step-content" id="step2">
+        <div class="step-title">2. ¿Qué código necesitas?</div>
+        <div class="step-sub">Selecciona el tipo de código</div>
+        <div class="type-list" id="typeList"></div>
+        <div class="wizard-nav">
+          <button class="btn-back" onclick="goStep(1)">← Atrás</button>
+          <button class="btn-next" id="btn2" onclick="goStep(3)" disabled>Continuar →</button>
+        </div>
+      </div>
+
+      <!-- STEP 3: EMAIL -->
+      <div class="step-content" id="step3">
+        <div class="step-title">3. Tu correo de cuenta</div>
+        <div class="step-sub">Ingresa el correo asociado a tu cuenta</div>
+        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:12px 16px;margin-bottom:20px;display:flex;gap:16px;">
+          <div style="font-size:12px;color:var(--muted);">Servicio</div>
+          <div style="font-size:12px;font-weight:700;" id="summaryService"></div>
+          <div style="font-size:12px;color:var(--muted);margin-left:auto;">Código</div>
+          <div style="font-size:12px;font-weight:700;" id="summaryType"></div>
+        </div>
+        <div class="input-group">
+          <label class="input-label">Correo de tu cuenta</label>
+          <div class="input-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+            <input type="email" id="emailInput" placeholder="alias@icloud.com" oninput="validateEmail()">
+          </div>
+          <div class="input-hint">💡 Escribe el correo que te proporcionamos</div>
+        </div>
+        <div id="emailError" class="error-box" style="display:none">❌ <span></span></div>
+        <div class="wizard-nav">
+          <button class="btn-back" onclick="goStep(2)">← Atrás</button>
+          <button class="btn-next" id="btn3" onclick="getCode()" disabled>Ver mi código →</button>
+        </div>
+      </div>
+
+      <!-- STEP 4: RESULT -->
+      <div class="step-content" id="step4">
+        <div id="loadingBox" class="loading">
+          <div class="spinner"></div>
+          <div class="loading-text">Buscando tu código...</div>
+        </div>
+        <div id="resultBox" style="display:none">
+          <div class="result-box">
+            <div class="result-icon">🎉</div>
+            <div class="result-title" id="resultTitle">¡Tu código está listo!</div>
+            <div class="result-sub" id="resultSub"></div>
+          </div>
+          <div class="code-display">
+            <div class="code-label" id="codeLabel"></div>
+            <div id="codeContent"></div>
+            <div class="code-timer">⏱ Este código expirará en 10:00 minutos</div>
+          </div>
+          <button class="btn-copy" id="btnCopy" onclick="copyCode()">📋 Copiar código</button>
+          <button class="btn-retry" onclick="goStep(3);getCode()">↻ Generar nuevo código</button>
+          <div class="how-to" id="howToBox"></div>
+        </div>
+        <div id="errorBox" style="display:none">
+          <div class="result-box">
+            <div class="result-icon">😕</div>
+            <div class="result-title">Sin resultados</div>
+            <div class="result-sub" id="errorMsg"></div>
+          </div>
+          <button class="btn-retry" onclick="getCode()">↻ Intentar de nuevo</button>
+          <button class="btn-back" style="width:100%;margin-top:10px;padding:12px;" onclick="goStep(1)">← Comenzar de nuevo</button>
+        </div>
+      </div>
+
+    </div><!-- wizard-card -->
+  </div><!-- hero-right -->
+</div><!-- hero -->
+</div>
+
+<!-- SERVICES SECTION -->
+<section id="servicios">
+  <div class="section-tag">Nuestros Servicios</div>
+  <h2 class="section-title">Elige el servicio que necesitas</h2>
+  <p class="section-sub">Códigos instantáneos para tus plataformas favoritas</p>
+  <div class="services-cards">
+    <div class="svc-card">
+      <div class="svc-logo-big">N</div>
+      <div class="svc-name">Netflix</div>
+      <div class="svc-desc">Obtén acceso inmediato a tu cuenta Netflix con nuestros códigos seguros.</div>
+      <div class="svc-features">
+        <div class="svc-feature">Código Hogar (Link)</div>
+        <div class="svc-feature">Inicio de Sesión (4 dígitos)</div>
+        <div class="svc-feature">Cambiar Contraseña</div>
+      </div>
+      <button class="btn-select" onclick="selectService('netflix');goStep(1);setTimeout(()=>goStep(2),100)">Seleccionar →</button>
+    </div>
+    <div class="svc-card">
+      <div class="svc-logo-big">D+</div>
+      <div class="svc-name">Disney+</div>
+      <div class="svc-desc">Accede a tu cuenta Disney+ con códigos de inicio de sesión al instante.</div>
+      <div class="svc-features">
+        <div class="svc-feature">Inicio de Sesión (4 dígitos)</div>
+      </div>
+      <button class="btn-select" onclick="selectService('disney');goStep(1);setTimeout(()=>goStep(2),100)">Seleccionar →</button>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="como-funciona">
+  <div class="section-tag">¿Cómo funciona?</div>
+  <h2 class="section-title">Obtener tu código es muy fácil</h2>
+  <div class="steps-grid">
+    <div class="step-card">
+      <div class="step-num">1</div>
+      <div class="step-card-title">Elige tu servicio</div>
+      <div class="step-card-desc">Selecciona entre Netflix o Disney+</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">2</div>
+      <div class="step-card-title">Tipo de código</div>
+      <div class="step-card-desc">Elige el tipo de código que necesitas obtener</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">3</div>
+      <div class="step-card-title">Ingresa tu correo</div>
+      <div class="step-card-desc">Escribe el correo asociado a tu cuenta</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">4</div>
+      <div class="step-card-title">Recibe tu código</div>
+      <div class="step-card-desc">Obtén tu código al instante y listo</div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY US -->
+<section>
+  <div class="section-tag">¿Por qué elegirnos?</div>
+  <h2 class="section-title">La plataforma más confiable</h2>
+  <div class="why-grid">
+    <div class="why-card"><div class="why-icon">🛡️</div><div class="why-title">Confianza</div><div class="why-desc">Miles de usuarios confían en nosotros</div></div>
+    <div class="why-card"><div class="why-icon">⚡</div><div class="why-title">Rapidez</div><div class="why-desc">Entrega de códigos en segundos</div></div>
+    <div class="why-card"><div class="why-icon">🔒</div><div class="why-title">Privacidad</div><div class="why-desc">Tu información siempre segura</div></div>
+    <div class="why-card"><div class="why-icon">💬</div><div class="why-title">Soporte</div><div class="why-desc">Te ayudamos en todo momento</div></div>
+  </div>
+  <div style="margin-top:20px;font-size:13px;color:var(--muted);text-align:center;">✅ Todos nuestros códigos son verificados y funcionan al 100%. Entrega automática e inmediata.</div>
+</section>
+
+<!-- CONTACT -->
+<section id="contacto">
+  <div class="section-tag">Contacto</div>
+  <h2 class="section-title">Estamos aquí para ayudarte</h2>
+  <div class="contact-grid">
+    <a class="contact-card" href="https://wa.me/51999999999" target="_blank">
+      <div class="contact-icon wa">💬</div>
+      <div class="contact-info">
+        <div class="contact-name">WhatsApp</div>
+        <div class="contact-desc">Escríbenos directamente</div>
+      </div>
+      <button class="contact-btn wa">Abrir chat</button>
+    </a>
+    <a class="contact-card" href="mailto:contacto@itachiperu.com">
+      <div class="contact-icon mail">✉️</div>
+      <div class="contact-info">
+        <div class="contact-name">Correo electrónico</div>
+        <div class="contact-desc">Te respondemos pronto</div>
+      </div>
+      <button class="contact-btn mail">Enviar correo</button>
+    </a>
+  </div>
+  <div class="hours-card">
+    <div class="hours-title">🕐 Horario de atención</div>
+    <div class="hours-row"><span class="hours-day">Lunes a Domingo</span><span class="hours-time">8:00 a.m. — 11:00 p.m.</span></div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-logo">ItachiPeru</div>
+  <div class="footer-copy">© 2025 ItachiPeru. Todos los derechos reservados.</div>
+  <div class="footer-socials">
+    <a class="social-btn" href="#">📘</a>
+    <a class="social-btn" href="#">📸</a>
+    <a class="social-btn" href="#">🎵</a>
+    <a class="social-btn" href="#">▶️</a>
+  </div>
+</footer>
+
+<script>
+const API_BASE = 'https://TU-PROYECTO.vercel.app'; // ← Cambia esto
+let currentService = '';
+let currentType = '';
+let currentEmail = '';
+let vendorSlug = '';
+let codigoActual = '';
+
+// Cargar info del vendedor desde el slug en la URL
+async function loadVendor() {
+  const params = new URLSearchParams(window.location.search);
+  const slug = params.get('v') || params.get('vendor');
+  if (!slug) return;
+  vendorSlug = slug;
+  try {
+    const res = await fetch(`${API_BASE}/api/vendedor-info?slug=${slug}`);
+    const data = await res.json();
+    if (data.ok && data.vendedor) {
+      const v = data.vendedor;
+      document.title = `${v.nombre.toUpperCase()} — ItachiPeru`;
+      document.querySelector('.nav-logo').textContent = 'ItachiPeru';
+      document.getElementById('vendorName').textContent = v.nombre.toUpperCase();
+      document.querySelector(':root').style.setProperty('--vendor-color', v.color || '#ff2d78');
+      const avatarEl = document.getElementById('vendorAvatar');
+      if (v.foto_url) {
+        avatarEl.outerHTML = `<img src="${v.foto_url}" class="vendor-avatar" id="vendorAvatar" alt="${v.nombre}">`;
+      } else {
+        avatarEl.textContent = v.nombre.charAt(0).toUpperCase();
+      }
+      document.getElementById('vendorInfo').style.display = 'flex';
+    }
+  } catch {}
+}
+
+const TYPES = {
+  netflix: [
+    { id: 'netflix_hogar', icon: '🏠', cls: 'hogar', name: 'Código Hogar', desc: 'Actualizar ubicación de tu cuenta', summary: 'Código Hogar (Link)' },
+    { id: 'netflix_login', icon: '🔑', cls: 'login', name: 'Inicio de Sesión', desc: 'Código de 4 dígitos para iniciar sesión', summary: 'Inicio de Sesión' },
+    { id: 'netflix_pass', icon: '🔒', cls: 'pass', name: 'Cambiar Contraseña', desc: 'Código de 6 dígitos para restablecer', summary: 'Cambiar Contraseña' },
+  ],
+  disney: [
+    { id: 'disney', icon: '✨', cls: 'login', name: 'Inicio de Sesión', desc: 'Código de 4 dígitos para tu cuenta', summary: 'Inicio de Sesión' },
+  ],
+};
+
+function selectService(s) {
+  currentService = s;
+  document.querySelectorAll('.service-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('svc-' + s).classList.add('selected');
+  document.getElementById('btn1').disabled = false;
+}
+
+function renderTypes() {
+  const list = document.getElementById('typeList');
+  list.innerHTML = '';
+  (TYPES[currentService] || []).forEach(t => {
+    list.innerHTML += `
+      <div class="type-card" id="type-${t.id}" onclick="selectType('${t.id}','${t.summary}')">
+        <div class="type-icon ${t.cls}">${t.icon}</div>
+        <div class="type-info">
+          <div class="type-name">${t.name}</div>
+          <div class="type-desc">${t.desc}</div>
+        </div>
+        <div class="type-radio"></div>
+      </div>`;
+  });
+}
+
+function selectType(id, summary) {
+  currentType = id;
+  document.querySelectorAll('.type-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('type-' + id).classList.add('selected');
+  document.getElementById('btn2').disabled = false;
+  document.getElementById('summaryType').textContent = summary;
+  document.getElementById('summaryService').textContent = currentService === 'netflix' ? 'Netflix' : 'Disney+';
+}
+
+function validateEmail() {
+  const val = document.getElementById('emailInput').value.trim();
+  document.getElementById('btn3').disabled = !val.includes('@');
+  document.getElementById('emailError').style.display = 'none';
+}
+
+function goStep(n) {
+  for (let i = 1; i <= 4; i++) {
+    document.getElementById('step' + i).classList.remove('active');
+    const sc = document.getElementById('sc' + i);
+    const sl = document.getElementById('sl' + i);
+    if (i < n) { sc.className = 'step-circle done'; sc.textContent = '✓'; sl.className = 'step-label done'; }
+    else if (i === n) { sc.className = 'step-circle active'; sc.textContent = i; sl.className = 'step-label active'; }
+    else { sc.className = 'step-circle pending'; sc.textContent = i; sl.className = 'step-label pending'; }
+    if (i < 4) { document.getElementById('line' + i).className = 'step-line' + (i < n ? ' done' : ''); }
+  }
+  document.getElementById('step' + n).classList.add('active');
+  if (n === 2) renderTypes();
+  if (n === 4) {
+    currentEmail = document.getElementById('emailInput').value.trim().toLowerCase();
+    fetchCode();
+  }
+}
+
+function startWizard() { goStep(1); }
+
+async function getCode() { goStep(4); }
+
+async function fetchCode() {
+  document.getElementById('loadingBox').style.display = 'flex';
+  document.getElementById('resultBox').style.display = 'none';
+  document.getElementById('errorBox').style.display = 'none';
+
+  try {
+    let url = `${API_BASE}/api/codigo?servicio=${encodeURIComponent(currentType)}&correo=${encodeURIComponent(currentEmail)}`;
+    if (vendorSlug) url += `&slug=${encodeURIComponent(vendorSlug)}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    document.getElementById('loadingBox').style.display = 'none';
+
+    if (data.success) {
+      codigoActual = data.valor;
+      document.getElementById('resultBox').style.display = 'block';
+
+      if (data.tipo === 'codigo') {
+        const digits = data.valor.toString().split('');
+        document.getElementById('codeContent').innerHTML = `<div class="code-digits">${digits.map(d => `<div class="code-digit">${d}</div>`).join('')}</div>`;
+        document.getElementById('codeLabel').textContent = currentType === 'netflix_login' ? 'Inicio de Sesión - Netflix' : currentType === 'disney' ? 'Inicio de Sesión - Disney+' : 'Código';
+        document.getElementById('resultTitle').textContent = currentType === 'netflix_login' ? '¡Tu código de inicio de sesión!' : currentType === 'disney' ? '¡Tu código de inicio de sesión!' : '¡Tu código está listo!';
+        document.getElementById('resultSub').textContent = `Usa este código de ${digits.length} dígitos para iniciar sesión en tu cuenta.`;
+        document.getElementById('btnCopy').textContent = '📋 Copiar código';
+        document.getElementById('howToBox').innerHTML = `<strong>💡 ¿Cómo usar este código?</strong>Ingresa este código en la pantalla de inicio de sesión para acceder a tu cuenta.`;
+      } else {
+        document.getElementById('codeContent').innerHTML = `<div class="code-link">${data.valor}</div>`;
+        document.getElementById('codeLabel').textContent = 'Código Hogar - Netflix';
+        document.getElementById('resultTitle').textContent = '¡Tu link de Netflix está listo!';
+        document.getElementById('resultSub').textContent = 'Usa este link para acceder a tu cuenta de hogar.';
+        document.getElementById('btnCopy').textContent = '📋 Copiar link';
+        document.getElementById('howToBox').innerHTML = `<strong>💡 ¿Cómo usar este link?</strong>Abre el link en tu navegador e inicia sesión en la sección "Hogar" de tu cuenta Netflix.`;
+      }
+    } else {
+      document.getElementById('errorBox').style.display = 'block';
+      document.getElementById('errorMsg').textContent = data.error || 'Error desconocido.';
+    }
+  } catch {
+    document.getElementById('loadingBox').style.display = 'none';
+    document.getElementById('errorBox').style.display = 'block';
+    document.getElementById('errorMsg').textContent = 'Error de conexión. Verifica tu internet e intenta de nuevo.';
+  }
+}
+
+function copyCode() {
+  navigator.clipboard.writeText(codigoActual);
+  document.getElementById('btnCopy').textContent = '✅ ¡Copiado!';
+  setTimeout(() => document.getElementById('btnCopy').textContent = '📋 Copiar código', 2000);
+}
+
+loadVendor();
+</script>
+</body>
+</html>

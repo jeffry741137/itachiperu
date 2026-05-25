@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Vendedor — ItachiPeru</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--pink:#ff2d78;--purple:#7c3aed;--cyan:#00d4ff;--green:#00e5a0;--bg:#040408;--bg2:#08060f;--sidebar:#07050e;--card:rgba(255,255,255,0.03);--border:rgba(255,255,255,0.07);--text:#f0e8ff;--muted:#7a6a8a;}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;min-height:100vh;display:flex;}
+
+/* SIDEBAR */
+.sidebar{width:240px;min-height:100vh;background:var(--sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;z-index:50;}
+.sidebar-logo{padding:24px 20px;border-bottom:1px solid var(--border);}
+.logo-text{font-size:18px;font-weight:800;background:linear-gradient(135deg,var(--pink),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.logo-tag{font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.1em;margin-top:2px;}
+.sidebar-vendor{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+.sv-avatar{width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid var(--pink);flex-shrink:0;}
+.sv-avatar-ph{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--pink),var(--purple));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;color:#fff;flex-shrink:0;}
+.sv-info{flex:1;min-width:0;}
+.sv-name{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sv-role{font-size:11px;color:var(--muted);}
+.sidebar-nav{flex:1;padding:12px 0;overflow-y:auto;}
+.nav-section{padding:8px 20px 4px;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.12em;}
+.nav-item{display:flex;align-items:center;gap:12px;padding:10px 20px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .2s;border-left:3px solid transparent;}
+.nav-item:hover{color:var(--text);background:rgba(255,255,255,0.03);}
+.nav-item.active{color:var(--pink);background:rgba(255,45,120,0.06);border-left-color:var(--pink);}
+.nav-icon{font-size:16px;flex-shrink:0;}
+.sidebar-bottom{padding:16px 20px;border-top:1px solid var(--border);}
+.btn-logout{width:100%;padding:10px;background:rgba(255,45,120,0.06);border:1px solid rgba(255,45,120,0.15);border-radius:10px;font-size:13px;font-weight:600;color:var(--pink);cursor:pointer;font-family:'Outfit',sans-serif;transition:all .2s;}
+.btn-logout:hover{background:rgba(255,45,120,0.12);}
+
+/* MAIN */
+.main{margin-left:240px;flex:1;min-height:100vh;}
+.topbar{padding:16px 32px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:rgba(4,4,8,0.8);backdrop-filter:blur(20px);position:sticky;top:0;z-index:40;}
+.page-title{font-size:20px;font-weight:800;}
+.page-sub{font-size:13px;color:var(--muted);margin-top:2px;}
+.topbar-right{display:flex;align-items:center;gap:16px;}
+.link-badge{display:flex;align-items:center;gap:8px;padding:8px 14px;background:rgba(0,212,255,0.06);border:1px solid rgba(0,212,255,0.15);border-radius:100px;font-size:12px;color:var(--cyan);cursor:pointer;font-weight:600;transition:all .2s;}
+.link-badge:hover{background:rgba(0,212,255,0.12);}
+
+/* PAGE CONTENT */
+.page{display:none;padding:32px;}
+.page.active{display:block;animation:fadeIn .3s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 24px;}
+.stat-icon{font-size:24px;margin-bottom:12px;}
+.stat-value{font-size:32px;font-weight:800;margin-bottom:4px;}
+.stat-label{font-size:12px;color:var(--muted);font-weight:600;}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:4px;}
+.stat-card.pink{border-color:rgba(255,45,120,0.2);background:rgba(255,45,120,0.04);}
+.stat-card.purple{border-color:rgba(124,58,237,0.2);background:rgba(124,58,237,0.04);}
+.stat-card.cyan{border-color:rgba(0,212,255,0.2);background:rgba(0,212,255,0.04);}
+.stat-card.green{border-color:rgba(0,229,160,0.2);background:rgba(0,229,160,0.04);}
+.stat-value.pink{color:var(--pink);}
+.stat-value.purple{color:#a78bfa;}
+.stat-value.cyan{color:var(--cyan);}
+.stat-value.green{color:var(--green);}
+
+/* LICENSE CARD */
+.license-card{background:linear-gradient(135deg,rgba(124,58,237,0.12),rgba(255,45,120,0.08));border:1px solid rgba(124,58,237,0.2);border-radius:16px;padding:24px;margin-bottom:24px;display:flex;align-items:center;gap:20px;}
+.license-icon{font-size:36px;}
+.license-info{flex:1;}
+.license-title{font-size:15px;font-weight:700;margin-bottom:4px;}
+.license-desc{font-size:13px;color:var(--muted);}
+.license-badge{padding:6px 14px;border-radius:100px;font-size:12px;font-weight:700;}
+.license-badge.active{background:rgba(0,229,160,0.12);color:var(--green);border:1px solid rgba(0,229,160,0.2);}
+.license-badge.warning{background:rgba(255,165,0,0.12);color:#ffa500;border:1px solid rgba(255,165,0,0.2);}
+.license-badge.expired{background:rgba(229,9,20,0.12);color:#ff4444;border:1px solid rgba(229,9,20,0.2);}
+
+/* SECTION HEADER */
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.section-title-sm{font-size:16px;font-weight:700;}
+.btn-add{display:flex;align-items:center;gap:8px;padding:10px 18px;background:linear-gradient(135deg,var(--pink),var(--purple));border:none;border-radius:10px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .2s;}
+.btn-add:hover{opacity:.9;}
+
+/* TABLE */
+.table-wrap{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;}
+table{width:100%;border-collapse:collapse;}
+th{padding:12px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;border-bottom:1px solid var(--border);}
+td{padding:14px 16px;font-size:13px;border-bottom:1px solid rgba(255,255,255,0.03);}
+tr:last-child td{border:none;}
+tr:hover td{background:rgba(255,255,255,0.02);}
+.badge-svc{padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;text-transform:uppercase;}
+.badge-svc.netflix{background:rgba(229,9,20,0.12);color:#e50914;}
+.badge-svc.disney{background:rgba(0,100,255,0.12);color:#4488ff;}
+.badge-active{padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;background:rgba(0,229,160,0.1);color:var(--green);}
+.badge-inactive{padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;background:rgba(255,45,120,0.1);color:var(--pink);}
+.btn-icon{width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:transparent;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:14px;transition:all .2s;}
+.btn-icon:hover{border-color:rgba(255,45,120,0.3);background:rgba(255,45,120,0.06);}
+.btn-icon.del:hover{border-color:rgba(229,9,20,0.4);background:rgba(229,9,20,0.06);}
+.empty-row{text-align:center;padding:40px;color:var(--muted);font-size:13px;}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+.modal-bg.open{display:flex;}
+.modal{background:#0d0a18;border:1px solid var(--border);border-radius:20px;padding:32px;width:100%;max-width:480px;animation:modalIn .3s ease;}
+@keyframes modalIn{from{opacity:0;transform:scale(.95);}to{opacity:1;transform:scale(1);}}
+.modal-title{font-size:18px;font-weight:700;margin-bottom:6px;}
+.modal-sub{font-size:13px;color:var(--muted);margin-bottom:24px;}
+.form-group{margin-bottom:16px;}
+.form-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:6px;}
+.form-input{width:100%;padding:12px 14px;background:rgba(255,255,255,0.04);border:1.5px solid var(--border);border-radius:10px;font-size:14px;color:var(--text);outline:none;font-family:'Outfit',sans-serif;transition:border-color .2s;}
+.form-input:focus{border-color:var(--pink);}
+.form-select{width:100%;padding:12px 14px;background:rgba(255,255,255,0.04);border:1.5px solid var(--border);border-radius:10px;font-size:14px;color:var(--text);outline:none;font-family:'Outfit',sans-serif;cursor:pointer;}
+.form-select option{background:#0d0a18;}
+.form-textarea{width:100%;padding:12px 14px;background:rgba(255,255,255,0.04);border:1.5px solid var(--border);border-radius:10px;font-size:13px;color:var(--text);outline:none;font-family:'Outfit',sans-serif;resize:vertical;min-height:80px;}
+.modal-btns{display:flex;gap:10px;margin-top:24px;}
+.btn-cancel{flex:1;padding:12px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:10px;font-size:14px;font-weight:600;color:var(--muted);cursor:pointer;font-family:'Outfit',sans-serif;}
+.btn-confirm{flex:2;padding:12px;background:linear-gradient(135deg,var(--pink),var(--purple));border:none;border-radius:10px;font-size:14px;font-weight:700;color:#fff;cursor:pointer;font-family:'Outfit',sans-serif;}
+.msg-box{padding:10px 14px;border-radius:8px;font-size:13px;font-weight:600;margin-bottom:12px;display:none;}
+.msg-box.ok{background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.2);color:var(--green);}
+.msg-box.err{background:rgba(229,9,20,0.08);border:1px solid rgba(229,9,20,0.2);color:#ff6b6b;}
+
+/* PROFILE */
+.profile-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:32px;max-width:600px;}
+.profile-avatar-big{width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid var(--pink);margin-bottom:16px;}
+.profile-avatar-ph{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--pink),var(--purple));display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;color:#fff;margin-bottom:16px;}
+.color-picker{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+.color-opt{width:28px;height:28px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all .2s;}
+.color-opt.selected{border-color:#fff;}
+.link-box{background:rgba(0,212,255,0.04);border:1px solid rgba(0,212,255,0.15);border-radius:12px;padding:16px;margin-bottom:24px;}
+.link-label{font-size:11px;font-weight:700;color:var(--cyan);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;}
+.link-url{font-size:13px;color:var(--text);word-break:break-all;margin-bottom:10px;}
+.btn-copy-link{padding:8px 16px;background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.2);border-radius:8px;font-size:12px;font-weight:700;color:var(--cyan);cursor:pointer;font-family:'Outfit',sans-serif;}
+
+/* LOGIN */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);padding:20px;}
+.login-card{background:#0a0812;border:1px solid var(--border);border-radius:24px;padding:40px;width:100%;max-width:420px;}
+.login-logo{font-size:22px;font-weight:800;background:linear-gradient(135deg,var(--pink),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px;}
+.login-title{font-size:22px;font-weight:700;margin-bottom:6px;}
+.login-sub{font-size:13px;color:var(--muted);margin-bottom:28px;}
+.login-link{font-size:13px;color:var(--muted);margin-top:20px;text-align:center;}
+.login-link a{color:var(--pink);text-decoration:none;font-weight:600;}
+
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%);}
+  .main{margin-left:0;}
+  .stats-grid{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginWrap" class="login-wrap">
+  <div class="login-card">
+    <div class="login-logo">ItachiPeru</div>
+    <div class="login-title">Iniciar sesión</div>
+    <div class="login-sub">Ingresa tus credenciales para acceder a tu cuenta</div>
+    <div id="loginMsg" class="msg-box"></div>
+    <div class="form-group">
+      <label class="form-label">Correo electrónico</label>
+      <input class="form-input" type="email" id="loginEmail" placeholder="ejemplo@correo.com">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Contraseña</label>
+      <input class="form-input" type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="btn-add" style="width:100%;justify-content:center;padding:14px;font-size:15px;" onclick="doLogin()">Iniciar sesión →</button>
+    <div class="login-link">¿No tienes cuenta? <a href="#" onclick="showRegister()">Crear cuenta</a></div>
+  </div>
+</div>
+
+<!-- REGISTER -->
+<div id="registerWrap" class="login-wrap" style="display:none">
+  <div class="login-card">
+    <div class="login-logo">ItachiPeru</div>
+    <div class="login-title">Crear cuenta</div>
+    <div class="login-sub">Completa los datos para crear tu cuenta de vendedor</div>
+    <div id="regMsg" class="msg-box"></div>
+    <div class="form-group"><label class="form-label">Nombre completo</label><input class="form-input" type="text" id="regNombre" placeholder="Tu nombre completo"></div>
+    <div class="form-group"><label class="form-label">Correo electrónico</label><input class="form-input" type="email" id="regEmail" placeholder="ejemplo@correo.com"></div>
+    <div class="form-group"><label class="form-label">Contraseña</label><input class="form-input" type="password" id="regPass" placeholder="Crea una contraseña"></div>
+    <div class="form-group"><label class="form-label">Código de invitación (opcional)</label><input class="form-input" type="text" id="regCodigo" placeholder="Ingresa el código de invitación"></div>
+    <button class="btn-add" style="width:100%;justify-content:center;padding:14px;font-size:15px;" onclick="doRegister()">Crear cuenta →</button>
+    <div class="login-link">¿Ya tienes cuenta? <a href="#" onclick="showLogin()">Iniciar sesión</a></div>
+  </div>
+</div>
+
+<!-- PANEL -->
+<div id="panelWrap" style="display:none;width:100%;display:none;">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-text">ItachiPeru</div>
+      <div class="logo-tag">Panel Vendedor</div>
+    </div>
+    <div class="sidebar-vendor">
+      <div id="sbAvatar" class="sv-avatar-ph">?</div>
+      <div class="sv-info">
+        <div class="sv-name" id="sbName">Cargando...</div>
+        <div class="sv-role">Vendedor</div>
+      </div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-section">Principal</div>
+      <div class="nav-item active" onclick="showPage('dashboard')"><span class="nav-icon">📊</span>Dashboard</div>
+      <div class="nav-section">Correos</div>
+      <div class="nav-item" onclick="showPage('principales')"><span class="nav-icon">✉️</span>Correos principales</div>
+      <div class="nav-item" onclick="showPage('alias')"><span class="nav-icon">📧</span>Agregar correo</div>
+      <div class="nav-section">Cuenta</div>
+      <div class="nav-item" onclick="showPage('perfil')"><span class="nav-icon">👤</span>Mi perfil</div>
+    </div>
+    <div class="sidebar-bottom">
+      <button class="btn-logout" onclick="logout()">Cerrar sesión</button>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="page-title" id="topTitle">Dashboard</div>
+        <div class="page-sub" id="topSub">Resumen general de tu actividad</div>
+      </div>
+      <div class="topbar-right">
+        <div class="link-badge" onclick="copyMyLink()">🔗 Mi link de página</div>
+      </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card pink"><div class="stat-icon">✉️</div><div class="stat-value pink" id="statPrincipales">0</div><div class="stat-label">Correos principales</div></div>
+        <div class="stat-card purple"><div class="stat-icon">📧</div><div class="stat-value purple" id="statAlias">0</div><div class="stat-label">Correos temporales</div></div>
+        <div class="stat-card cyan"><div class="stat-icon">🛡️</div><div class="stat-value cyan" id="statLicencia">–</div><div class="stat-label">Licencia actual</div></div>
+        <div class="stat-card green"><div class="stat-icon">📅</div><div class="stat-value green" id="statDias">0</div><div class="stat-label">Días restantes</div></div>
+      </div>
+      <div class="license-card" id="licenseCard">
+        <div class="license-icon">🛡️</div>
+        <div class="license-info">
+          <div class="license-title">Tu licencia actual está <span id="licenseEstado">activa</span></div>
+          <div class="license-desc">Tu licencia te permite crear y gestionar correos principales y temporales.</div>
+        </div>
+        <div class="license-badge active" id="licenseBadge">Activa</div>
+      </div>
+      <div class="section-header"><div class="section-title-sm">💡 Tu link de página</div></div>
+      <div class="link-box">
+        <div class="link-label">Comparte este link con tus clientes</div>
+        <div class="link-url" id="myPageLink">Cargando...</div>
+        <button class="btn-copy-link" onclick="copyMyLink()">📋 Copiar link</button>
+      </div>
+    </div>
+
+    <!-- CORREOS PRINCIPALES -->
+    <div class="page" id="page-principales">
+      <div class="section-header">
+        <div class="section-title-sm">Correos principales iCloud</div>
+        <button class="btn-add" onclick="openModal('addPrincipal')">+ Agregar correo principal</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Correo</th><th>Contraseña</th><th>Servicio</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <tbody id="tbPrincipales"><tr><td colspan="5" class="empty-row">Cargando...</td></tr></tbody>
+        </table>
+      </div>
+      <div style="margin-top:12px;font-size:12px;color:var(--muted);">ℹ️ Estos son tus correos principales registrados.</div>
+    </div>
+
+    <!-- ALIAS -->
+    <div class="page" id="page-alias">
+      <div class="section-header">
+        <div class="section-title-sm">Agregar correos temporales</div>
+      </div>
+      <div class="profile-card" style="max-width:700px;">
+        <div class="form-group">
+          <label class="form-label">Paso 1 — Selecciona el servicio</label>
+          <select class="form-select" id="aliasServicio" onchange="loadPrincipalesForAlias()">
+            <option value="">Selecciona el servicio</option>
+            <option value="netflix">Netflix</option>
+            <option value="disney">Disney+</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Paso 2 — Selecciona un correo principal</label>
+          <select class="form-select" id="aliasPrincipal">
+            <option value="">Primero selecciona el servicio</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Paso 3 — Correos temporales (uno por línea)</label>
+          <textarea class="form-textarea" id="aliasCorreos" placeholder="temporal1@icloud.com&#10;temporal2@icloud.com&#10;temporal3@icloud.com" style="min-height:120px;"></textarea>
+        </div>
+        <div id="aliasMsg" class="msg-box"></div>
+        <button class="btn-add" onclick="addAlias()">➕ Agregar correos</button>
+        <div style="margin-top:32px;">
+          <div class="section-title-sm" style="margin-bottom:16px;">Correos registrados</div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Alias</th><th>Correo principal</th><th>Servicio</th><th>Acciones</th></tr></thead>
+              <tbody id="tbAlias"><tr><td colspan="4" class="empty-row">Cargando...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PERFIL -->
+    <div class="page" id="page-perfil">
+      <div class="profile-card">
+        <div id="perfilAvatar" class="profile-avatar-ph">?</div>
+        <div class="section-title-sm" style="margin-bottom:20px;">Mi perfil</div>
+        <div id="perfilMsg" class="msg-box"></div>
+        <div class="form-group">
+          <label class="form-label">Nombre</label>
+          <input class="form-input" type="text" id="perfilNombre" placeholder="Tu nombre">
+        </div>
+        <div class="form-group">
+          <label class="form-label">URL de foto de perfil</label>
+          <input class="form-input" type="text" id="perfilFoto" placeholder="https://..." oninput="previewAvatar()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Color de verificación</label>
+          <div class="color-picker" id="colorPicker">
+            <div class="color-opt selected" style="background:#ff2d78" onclick="selectColor('#ff2d78',this)"></div>
+            <div class="color-opt" style="background:#7c3aed" onclick="selectColor('#7c3aed',this)"></div>
+            <div class="color-opt" style="background:#00d4ff" onclick="selectColor('#00d4ff',this)"></div>
+            <div class="color-opt" style="background:#00e5a0" onclick="selectColor('#00e5a0',this)"></div>
+            <div class="color-opt" style="background:#ffa500" onclick="selectColor('#ffa500',this)"></div>
+            <div class="color-opt" style="background:#ff6b6b" onclick="selectColor('#ff6b6b',this)"></div>
+          </div>
+        </div>
+        <button class="btn-add" onclick="savePerfil()">💾 Guardar cambios</button>
+      </div>
+    </div>
+
+  </div><!-- main -->
+</div><!-- panelWrap -->
+
+<!-- MODAL ADD PRINCIPAL -->
+<div class="modal-bg" id="modal-addPrincipal">
+  <div class="modal">
+    <div class="modal-title">Agregar correo principal</div>
+    <div class="modal-sub">Completa los datos para agregar un nuevo correo principal iCloud</div>
+    <div id="addPrincipalMsg" class="msg-box"></div>
+    <div class="form-group"><label class="form-label">Correo electrónico iCloud</label><input class="form-input" type="text" id="apCorreo" placeholder="correo@icloud.com"></div>
+    <div class="form-group"><label class="form-label">Contraseña de App (iCloud)</label><input class="form-input" type="password" id="apPass" placeholder="xxxx-xxxx-xxxx-xxxx"></div>
+    <div class="form-group">
+      <label class="form-label">Servicio</label>
+      <select class="form-select" id="apServicio">
+        <option value="netflix">Netflix</option>
+        <option value="disney">Disney+</option>
+      </select>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal('addPrincipal')">Cancelar</button>
+      <button class="btn-confirm" onclick="addPrincipal()">Agregar correo</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = 'https://TU-PROYECTO.vercel.app'; // ← Cambia esto
+let token = localStorage.getItem('vendor_token');
+let vendedor = null;
+let selectedColor = '#ff2d78';
+let principalesList = [];
+
+async function api(endpoint, opts={}) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = 'Bearer ' + token;
+  const res = await fetch(API + endpoint, { ...opts, headers });
+  return res.json();
+}
+
+// ── AUTH ──
+async function init() {
+  if (!token) { showLogin(); return; }
+  const data = await api('/api/auth?action=verify');
+  if (!data.ok) { showLogin(); return; }
+  vendedor = data.vendedor;
+  showPanel();
+}
+
+function showLogin() {
+  document.getElementById('loginWrap').style.display = 'flex';
+  document.getElementById('registerWrap').style.display = 'none';
+  document.getElementById('panelWrap').style.display = 'none';
+}
+function showRegister() {
+  document.getElementById('loginWrap').style.display = 'none';
+  document.getElementById('registerWrap').style.display = 'flex';
+}
+
+async function doLogin() {
+  const correo = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPass').value;
+  showMsg('loginMsg', '', 'Ingresando...');
+  const data = await api('/api/auth?action=login', { method:'POST', body: JSON.stringify({correo,password}) });
+  if (data.ok) {
+    token = data.token;
+    vendedor = data.vendedor;
+    localStorage.setItem('vendor_token', token);
+    showPanel();
+  } else {
+    showMsg('loginMsg', 'err', data.error);
+  }
+}
+
+async function doRegister() {
+  const nombre = document.getElementById('regNombre').value.trim();
+  const correo = document.getElementById('regEmail').value.trim();
+  const password = document.getElementById('regPass').value;
+  const codigo_invitacion = document.getElementById('regCodigo').value.trim();
+  const data = await api('/api/auth?action=registro', { method:'POST', body: JSON.stringify({nombre,correo,password,codigo_invitacion}) });
+  if (data.ok) {
+    token = data.token;
+    vendedor = data.vendedor;
+    localStorage.setItem('vendor_token', token);
+    showPanel();
+  } else {
+    showMsg('regMsg', 'err', data.error);
+  }
+}
+
+function logout() {
+  localStorage.removeItem('vendor_token');
+  token = null;
+  vendedor = null;
+  showLogin();
+}
+
+// ── PANEL ──
+function showPanel() {
+  document.getElementById('loginWrap').style.display = 'none';
+  document.getElementById('registerWrap').style.display = 'none';
+  document.getElementById('panelWrap').style.display = 'flex';
+  updateSidebar();
+  loadDashboard();
+}
+
+function updateSidebar() {
+  if (!vendedor) return;
+  document.getElementById('sbName').textContent = vendedor.nombre;
+  const av = document.getElementById('sbAvatar');
+  if (vendedor.foto_url) {
+    av.outerHTML = `<img src="${vendedor.foto_url}" class="sv-avatar" id="sbAvatar">`;
+  } else {
+    av.textContent = vendedor.nombre.charAt(0).toUpperCase();
+  }
+}
+
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  event?.currentTarget?.classList.add('active');
+  const titles = { dashboard:'Dashboard', principales:'Correos principales', alias:'Agregar correo', perfil:'Mi perfil' };
+  const subs = { dashboard:'Resumen general de tu actividad', principales:'Administra tus correos principales', alias:'Agrega correos temporales', perfil:'Gestiona tu información' };
+  document.getElementById('topTitle').textContent = titles[name] || name;
+  document.getElementById('topSub').textContent = subs[name] || '';
+  if (name === 'principales') loadPrincipales();
+  if (name === 'alias') { loadPrincipales(); loadAlias(); }
+  if (name === 'perfil') loadPerfil();
+}
+
+// ── DASHBOARD ──
+async function loadDashboard() {
+  const data = await api('/api/vendedor?action=dashboard');
+  if (!data.ok) return;
+  vendedor = data.vendedor;
+  const s = data.stats;
+  document.getElementById('statPrincipales').textContent = s.principales;
+  document.getElementById('statAlias').textContent = s.alias;
+  document.getElementById('statDias').textContent = s.dias_restantes;
+  document.getElementById('statLicencia').textContent = s.licencia_activa ? 'Activa' : 'Expirada';
+  const badge = document.getElementById('licenseBadge');
+  if (s.licencia_activa) { badge.className = 'license-badge active'; badge.textContent = 'Activa'; }
+  else { badge.className = 'license-badge expired'; badge.textContent = 'Expirada'; }
+  const baseUrl = window.location.origin + '/index.html';
+  const link = `${baseUrl}?v=${vendedor.slug}`;
+  document.getElementById('myPageLink').textContent = link;
+}
+
+function copyMyLink() {
+  const link = document.getElementById('myPageLink').textContent;
+  navigator.clipboard.writeText(link);
+  showToast('✅ Link copiado al portapapeles');
+}
+
+// ── CORREOS PRINCIPALES ──
+async function loadPrincipales() {
+  const data = await api('/api/vendedor?action=principales-list');
+  principalesList = data.data || [];
+  const tb = document.getElementById('tbPrincipales');
+  if (!principalesList.length) { tb.innerHTML = '<tr><td colspan="5" class="empty-row">No hay correos principales registrados.</td></tr>'; return; }
+  tb.innerHTML = principalesList.map(p => `
+    <tr>
+      <td>${p.correo}</td>
+      <td>••••••••••••••</td>
+      <td><span class="badge-svc ${p.servicio}">${p.servicio}</span></td>
+      <td><span class="${p.activo?'badge-active':'badge-inactive'}">${p.activo?'Activo':'Inactivo'}</span></td>
+      <td><button class="btn-icon del" onclick="deletePrincipal(${p.id})">🗑</button></td>
+    </tr>`).join('');
+}
+
+async function addPrincipal() {
+  const correo = document.getElementById('apCorreo').value.trim();
+  const password_app = document.getElementById('apPass').value.trim();
+  const servicio = document.getElementById('apServicio').value;
+  const data = await api('/api/vendedor?action=principales-add', { method:'POST', body: JSON.stringify({correo,password_app,servicio}) });
+  if (data.ok) {
+    showMsg('addPrincipalMsg', 'ok', '✅ Correo principal agregado correctamente.');
+    setTimeout(() => { closeModal('addPrincipal'); loadPrincipales(); }, 1500);
+  } else showMsg('addPrincipalMsg', 'err', data.error);
+}
+
+async function deletePrincipal(id) {
+  if (!confirm('¿Eliminar este correo principal?')) return;
+  await api('/api/vendedor?action=principales-delete', { method:'DELETE', body: JSON.stringify({id}) });
+  loadPrincipales();
+}
+
+// ── ALIAS ──
+async function loadPrincipalesForAlias() {
+  const servicio = document.getElementById('aliasServicio').value;
+  const sel = document.getElementById('aliasPrincipal');
+  const filtrados = principalesList.filter(p => !servicio || p.servicio === servicio);
+  sel.innerHTML = filtrados.length
+    ? filtrados.map(p => `<option value="${p.id}">${p.correo}</option>`).join('')
+    : '<option value="">No hay correos para este servicio</option>';
+}
+
+async function addAlias() {
+  const correo_principal_id = document.getElementById('aliasPrincipal').value;
+  const servicio = document.getElementById('aliasServicio').value;
+  const raw = document.getElementById('aliasCorreos').value.trim();
+  const aliases = raw.split('\n').map(s=>s.trim()).filter(Boolean);
+  if (!correo_principal_id || !servicio || !aliases.length) {
+    showMsg('aliasMsg','err','Completa todos los campos.'); return;
+  }
+  const data = await api('/api/vendedor?action=alias-add', { method:'POST', body: JSON.stringify({aliases,correo_principal_id,servicio}) });
+  if (data.ok) {
+    showMsg('aliasMsg','ok',`✅ ${data.data.length} correo(s) agregado(s).`);
+    document.getElementById('aliasCorreos').value = '';
+    loadAlias();
+  } else showMsg('aliasMsg','err',data.error);
+}
+
+async function loadAlias() {
+  const data = await api('/api/vendedor?action=alias-list');
+  const tb = document.getElementById('tbAlias');
+  const list = data.data || [];
+  if (!list.length) { tb.innerHTML = '<tr><td colspan="4" class="empty-row">No hay correos temporales registrados.</td></tr>'; return; }
+  tb.innerHTML = list.map(a => `
+    <tr>
+      <td>${a.alias}</td>
+      <td style="color:var(--muted);font-size:12px;">${a.principal}</td>
+      <td><span class="badge-svc ${a.servicio}">${a.servicio}</span></td>
+      <td><button class="btn-icon del" onclick="deleteAlias(${a.id})">🗑</button></td>
+    </tr>`).join('');
+}
+
+async function deleteAlias(id) {
+  if (!confirm('¿Eliminar este alias?')) return;
+  await api('/api/vendedor?action=alias-delete', { method:'DELETE', body: JSON.stringify({id}) });
+  loadAlias();
+}
+
+// ── PERFIL ──
+function loadPerfil() {
+  if (!vendedor) return;
+  document.getElementById('perfilNombre').value = vendedor.nombre || '';
+  document.getElementById('perfilFoto').value = vendedor.foto_url || '';
+  selectedColor = vendedor.color || '#ff2d78';
+  previewAvatar();
+}
+
+function previewAvatar() {
+  const url = document.getElementById('perfilFoto').value;
+  const el = document.getElementById('perfilAvatar');
+  if (url) el.outerHTML = `<img src="${url}" class="profile-avatar-big" id="perfilAvatar" onerror="this.outerHTML='<div class=profile-avatar-ph id=perfilAvatar>${vendedor?.nombre?.charAt(0)||'?'}</div>'">`;
+  else el.textContent = vendedor?.nombre?.charAt(0) || '?';
+}
+
+function selectColor(c, el) {
+  selectedColor = c;
+  document.querySelectorAll('.color-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+async function savePerfil() {
+  const nombre = document.getElementById('perfilNombre').value.trim();
+  const foto_url = document.getElementById('perfilFoto').value.trim();
+  const data = await api('/api/vendedor?action=perfil-update', { method:'PATCH', body: JSON.stringify({nombre,foto_url,color:selectedColor}) });
+  if (data.ok) {
+    vendedor = { ...vendedor, ...data.data };
+    showMsg('perfilMsg','ok','✅ Perfil actualizado correctamente.');
+    updateSidebar();
+    loadDashboard();
+  } else showMsg('perfilMsg','err',data.error);
+}
+
+// ── UTILS ──
+function openModal(id) { document.getElementById('modal-'+id).classList.add('open'); }
+function closeModal(id) { document.getElementById('modal-'+id).classList.remove('open'); }
+function showMsg(id, type, text) {
+  const el = document.getElementById(id);
+  el.className = 'msg-box ' + type;
+  el.textContent = text;
+  el.style.display = 'block';
+  if (type !== '') setTimeout(() => el.style.display='none', 4000);
+}
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#0d0a18;border:1px solid rgba(0,229,160,0.3);color:#00e5a0;padding:12px 20px;border-radius:12px;font-size:13px;font-weight:700;z-index:999;animation:fadeIn .3s ease;font-family:Outfit,sans-serif;';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+init();
+</script>
+</body>
+</html>
