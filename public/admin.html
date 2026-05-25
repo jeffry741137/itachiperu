@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Creador — ItachiPeru</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--pink:#ff2d78;--purple:#7c3aed;--cyan:#00d4ff;--green:#00e5a0;--orange:#ffa500;--bg:#040408;--sidebar:#06040e;--card:rgba(255,255,255,0.03);--border:rgba(255,255,255,0.07);--text:#f0e8ff;--muted:#7a6a8a;}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;min-height:100vh;display:flex;}
+.sidebar{width:220px;min-height:100vh;background:var(--sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;z-index:50;}
+.sidebar-logo{padding:20px;border-bottom:1px solid var(--border);}
+.logo-text{font-size:17px;font-weight:800;background:linear-gradient(135deg,var(--pink),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.logo-tag{font-size:10px;color:var(--pink);font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-top:2px;}
+.sidebar-user{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.user-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--pink),var(--purple));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}
+.user-name{font-size:12px;font-weight:700;}
+.user-role{font-size:10px;color:var(--pink);font-weight:700;text-transform:uppercase;}
+.sidebar-nav{flex:1;padding:8px 0;overflow-y:auto;}
+.nav-group{padding:8px 20px 4px;font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.12em;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 20px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .2s;border-left:2px solid transparent;}
+.nav-item:hover{color:var(--text);background:rgba(255,255,255,0.02);}
+.nav-item.active{color:var(--pink);background:rgba(255,45,120,0.05);border-left-color:var(--pink);}
+.sidebar-bottom{padding:14px 20px;border-top:1px solid var(--border);}
+.btn-logout{width:100%;padding:9px;background:rgba(255,45,120,0.06);border:1px solid rgba(255,45,120,0.15);border-radius:8px;font-size:12px;font-weight:600;color:var(--pink);cursor:pointer;font-family:'Outfit',sans-serif;}
+.main{margin-left:220px;flex:1;min-height:100vh;}
+.topbar{padding:14px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:rgba(4,4,8,0.9);backdrop-filter:blur(20px);position:sticky;top:0;z-index:40;}
+.page-title{font-size:18px;font-weight:800;}
+.page-sub{font-size:12px;color:var(--muted);margin-top:1px;}
+.topbar-meta{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;}
+.page{display:none;padding:28px;animation:fadeIn .3s ease;}
+.page.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+.stats-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:28px;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px;transition:border-color .2s;}
+.stat-card:hover{border-color:rgba(255,45,120,0.2);}
+.stat-icon{font-size:20px;margin-bottom:10px;}
+.stat-val{font-size:28px;font-weight:800;margin-bottom:2px;}
+.stat-lbl{font-size:11px;color:var(--muted);font-weight:600;}
+.stat-link{font-size:11px;color:var(--pink);margin-top:4px;cursor:pointer;font-weight:600;}
+.stat-val.pink{color:var(--pink);}
+.stat-val.purple{color:#a78bfa;}
+.stat-val.cyan{color:var(--cyan);}
+.stat-val.green{color:var(--green);}
+.stat-val.orange{color:var(--orange);}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.section-title-sm{font-size:15px;font-weight:700;}
+.btn-add{display:flex;align-items:center;gap:7px;padding:9px 16px;background:linear-gradient(135deg,var(--pink),var(--purple));border:none;border-radius:9px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;font-family:'Outfit',sans-serif;}
+.btn-sm{padding:6px 12px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;font-family:'Outfit',sans-serif;transition:all .2s;}
+.btn-sm:hover{color:var(--text);border-color:rgba(255,255,255,0.15);}
+.btn-sm.danger{color:#ff6b6b;}
+.btn-sm.danger:hover{border-color:rgba(229,9,20,0.3);background:rgba(229,9,20,0.05);}
+.btn-sm.success{color:var(--green);}
+.table-wrap{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:24px;}
+table{width:100%;border-collapse:collapse;}
+th{padding:10px 14px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;border-bottom:1px solid var(--border);}
+td{padding:12px 14px;font-size:12px;border-bottom:1px solid rgba(255,255,255,0.03);}
+tr:last-child td{border:none;}
+tr:hover td{background:rgba(255,255,255,0.015);}
+.badge{padding:3px 9px;border-radius:6px;font-size:10px;font-weight:700;text-transform:uppercase;}
+.badge.active{background:rgba(0,229,160,0.1);color:var(--green);}
+.badge.inactivo{background:rgba(255,165,0,0.1);color:var(--orange);}
+.badge.suspendido{background:rgba(229,9,20,0.1);color:#ff4444;}
+.badge.expirada{background:rgba(229,9,20,0.1);color:#ff4444;}
+.badge.netflix{background:rgba(229,9,20,0.1);color:#e50914;}
+.badge.disney{background:rgba(0,100,255,0.1);color:#4488ff;}
+.badge.usado{background:rgba(0,229,160,0.1);color:var(--green);}
+.badge.activo-cod{background:rgba(255,45,120,0.1);color:var(--pink);}
+.badge.expirado-cod{background:rgba(255,255,255,0.05);color:var(--muted);}
+.empty-row{text-align:center;padding:32px;color:var(--muted);font-size:12px;}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(6px);}
+.modal-bg.open{display:flex;}
+.modal{background:#0c0916;border:1px solid var(--border);border-radius:18px;padding:28px;width:100%;max-width:460px;animation:mIn .25s ease;}
+@keyframes mIn{from{opacity:0;transform:scale(.96);}to{opacity:1;transform:scale(1);}}
+.modal-title{font-size:17px;font-weight:700;margin-bottom:4px;}
+.modal-sub{font-size:12px;color:var(--muted);margin-bottom:20px;}
+.form-group{margin-bottom:14px;}
+.form-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:5px;}
+.form-input{width:100%;padding:10px 12px;background:rgba(255,255,255,0.04);border:1.5px solid var(--border);border-radius:9px;font-size:13px;color:var(--text);outline:none;font-family:'Outfit',sans-serif;transition:border-color .2s;}
+.form-input:focus{border-color:var(--pink);}
+.form-select{width:100%;padding:10px 12px;background:rgba(255,255,255,0.04);border:1.5px solid var(--border);border-radius:9px;font-size:13px;color:var(--text);outline:none;font-family:'Outfit',sans-serif;cursor:pointer;}
+.form-select option{background:#0c0916;}
+.modal-btns{display:flex;gap:10px;margin-top:20px;}
+.btn-cancel{flex:1;padding:11px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:9px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;font-family:'Outfit',sans-serif;}
+.btn-confirm{flex:2;padding:11px;background:linear-gradient(135deg,var(--pink),var(--purple));border:none;border-radius:9px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;font-family:'Outfit',sans-serif;}
+.msg-box{padding:9px 12px;border-radius:8px;font-size:12px;font-weight:600;margin-bottom:12px;display:none;}
+.msg-box.ok{background:rgba(0,229,160,0.07);border:1px solid rgba(0,229,160,0.2);color:var(--green);}
+.msg-box.err{background:rgba(229,9,20,0.07);border:1px solid rgba(229,9,20,0.2);color:#ff6b6b;}
+.code-display-big{text-align:center;padding:24px;background:rgba(255,45,120,0.05);border:1.5px solid rgba(255,45,120,0.15);border-radius:14px;margin:16px 0;}
+.code-num{font-size:52px;font-weight:900;color:var(--pink);letter-spacing:8px;font-family:'Outfit',sans-serif;}
+.code-exp{font-size:12px;color:var(--muted);margin-top:8px;}
+.code-timer-bar{width:100%;height:4px;background:rgba(255,255,255,0.05);border-radius:2px;margin-top:12px;overflow:hidden;}
+.code-timer-fill{height:100%;background:linear-gradient(90deg,var(--pink),var(--purple));border-radius:2px;animation:countdown 600s linear forwards;}
+@keyframes countdown{from{width:100%;}to{width:0%;}}
+.recent-list{display:flex;flex-direction:column;gap:8px;}
+.recent-item{display:flex;align-items:center;gap:12px;padding:10px 14px;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:10px;font-size:12px;}
+.recent-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.recent-dot.add{background:var(--green);}
+.recent-dot.delete{background:#ff6b6b;}
+.recent-dot.login{background:var(--cyan);}
+.recent-dot.other{background:var(--muted);}
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);}
+.login-card{background:#0a0812;border:1px solid var(--border);border-radius:22px;padding:36px;width:100%;max-width:400px;}
+.chart-bars{display:flex;align-items:flex-end;gap:4px;height:80px;margin-top:12px;}
+.chart-bar{flex:1;background:linear-gradient(to top,rgba(255,45,120,0.4),rgba(124,58,237,0.4));border-radius:4px 4px 0 0;min-height:4px;transition:all .3s;}
+.search-input{padding:9px 14px;background:rgba(255,255,255,0.04);border:1.5px solid var(--border);border-radius:9px;font-size:12px;color:var(--text);outline:none;font-family:'Outfit',sans-serif;width:220px;}
+.search-input:focus{border-color:var(--pink);}
+.vendor-detail{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px;}
+.vendor-detail-header{display:flex;align-items:center;gap:14px;margin-bottom:14px;}
+.vd-avatar{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--pink),var(--purple));display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;}
+.vd-name{font-size:16px;font-weight:700;}
+.vd-email{font-size:12px;color:var(--muted);}
+.tabs{display:flex;gap:2px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:3px;margin-bottom:16px;width:fit-content;}
+.tab{padding:7px 14px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;color:var(--muted);transition:all .2s;}
+.tab.active{background:rgba(255,45,120,0.12);color:var(--pink);}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginWrap" class="login-wrap" style="width:100%">
+  <div class="login-card">
+    <div style="font-size:19px;font-weight:800;background:linear-gradient(135deg,var(--pink),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px;">ItachiPeru</div>
+    <div style="font-size:20px;font-weight:700;margin-bottom:6px;">Panel Creador</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:24px;">Acceso exclusivo para administradores</div>
+    <div id="loginMsg" class="msg-box"></div>
+    <div class="form-group"><label class="form-label">Correo</label><input class="form-input" type="email" id="adminEmail" placeholder="admin@itachiperu.com"></div>
+    <div class="form-group"><label class="form-label">Contraseña</label><input class="form-input" type="password" id="adminPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="btn-add" style="width:100%;justify-content:center;padding:13px;font-size:14px;" onclick="doLogin()">Ingresar →</button>
+  </div>
+</div>
+
+<!-- PANEL -->
+<div id="panelWrap" style="display:none;width:100%;">
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-text">ItachiPeru</div>
+      <div class="logo-tag">Panel Creador</div>
+    </div>
+    <div class="sidebar-user">
+      <div class="user-avatar">AD</div>
+      <div><div class="user-name">Admin Creador</div><div class="user-role">Creador</div></div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-group">Principal</div>
+      <div class="nav-item active" onclick="showPage('dashboard')">📊 Dashboard</div>
+      <div class="nav-group">Gestión</div>
+      <div class="nav-item" onclick="showPage('vendedores')">👥 Vendedores</div>
+      <div class="nav-item" onclick="showPage('correos')">✉️ Correos</div>
+      <div class="nav-item" onclick="showPage('licencias')">🛡️ Licencias</div>
+      <div class="nav-group">Sistema</div>
+      <div class="nav-item" onclick="showPage('codigos')">🔑 Códigos de registro</div>
+      <div class="nav-item" onclick="showPage('transacciones')">💰 Transacciones</div>
+      <div class="nav-item" onclick="showPage('logs')">📋 Logs de actividad</div>
+    </div>
+    <div class="sidebar-bottom">
+      <button class="btn-logout" onclick="logout()">Cerrar sesión</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div><div class="page-title" id="topTitle">Dashboard</div><div class="page-sub" id="topSub">Resumen general de la plataforma</div></div>
+      <div class="topbar-meta">📅 <span id="topDate"></span></div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-val pink" id="dsVendedores">–</div><div class="stat-lbl">Vendedores registrados</div><div class="stat-link" onclick="showPage('vendedores')">Ver vendedores →</div></div>
+        <div class="stat-card"><div class="stat-icon">✉️</div><div class="stat-val purple" id="dsPrincipales">–</div><div class="stat-lbl">Correos principales</div><div class="stat-link" onclick="showPage('correos')">Ver correos →</div></div>
+        <div class="stat-card"><div class="stat-icon">📧</div><div class="stat-val cyan" id="dsAlias">–</div><div class="stat-lbl">Correos temporales</div></div>
+        <div class="stat-card"><div class="stat-icon">🛡️</div><div class="stat-val green" id="dsLicencias">–</div><div class="stat-lbl">Licencias activas</div><div class="stat-link" onclick="showPage('licencias')">Ver licencias →</div></div>
+        <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-val orange" id="dsIngresos">–</div><div class="stat-lbl">Ingresos totales (mes)</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+        <div>
+          <div class="section-header"><div class="section-title-sm">👥 Vendedores recientes</div><button class="btn-sm" onclick="showPage('vendedores')">Ver todos →</button></div>
+          <div class="table-wrap"><table>
+            <thead><tr><th>Vendedor</th><th>Estado</th><th>Licencia</th><th>Registrado</th></tr></thead>
+            <tbody id="tbRecentVendors"><tr><td colspan="4" class="empty-row">Cargando...</td></tr></tbody>
+          </table></div>
+        </div>
+        <div>
+          <div class="section-header"><div class="section-title-sm">📋 Actividad reciente</div></div>
+          <div id="recentLogs" class="recent-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VENDEDORES -->
+    <div class="page" id="page-vendedores">
+      <div class="section-header">
+        <div class="section-title-sm">Administra todos los vendedores</div>
+        <div style="display:flex;gap:10px;">
+          <input class="search-input" placeholder="Buscar vendedor..." oninput="filterVendors(this.value)">
+          <button class="btn-add" onclick="openModal('addVendedor')">+ Agregar vendedor</button>
+        </div>
+      </div>
+      <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px;">
+        <div class="stat-card"><div class="stat-val pink" id="vTotal">–</div><div class="stat-lbl">Total vendedores</div></div>
+        <div class="stat-card"><div class="stat-val green" id="vActivos">–</div><div class="stat-lbl">Activos</div></div>
+        <div class="stat-card"><div class="stat-val orange" id="vInactivos">–</div><div class="stat-lbl">Inactivos</div></div>
+        <div class="stat-card"><div class="stat-val" style="color:#ff4444" id="vSuspendidos">–</div><div class="stat-lbl">Suspendidos</div></div>
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>#</th><th>Vendedor</th><th>Correo</th><th>Estado</th><th>Licencia</th><th>Principales</th><th>Alias</th><th>Registrado</th><th>Acciones</th></tr></thead>
+        <tbody id="tbVendedores"><tr><td colspan="9" class="empty-row">Cargando...</td></tr></tbody>
+      </table></div>
+    </div>
+
+    <!-- CORREOS -->
+    <div class="page" id="page-correos">
+      <div class="section-header"><div class="section-title-sm">Todos los correos principales</div></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Correo</th><th>Servicio</th><th>Vendedor</th><th>Estado</th><th>Agregado</th></tr></thead>
+        <tbody id="tbCorreos"><tr><td colspan="5" class="empty-row">Cargando...</td></tr></tbody>
+      </table></div>
+    </div>
+
+    <!-- LICENCIAS -->
+    <div class="page" id="page-licencias">
+      <div class="section-header"><div class="section-title-sm">Gestión de licencias</div></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>#</th><th>Vendedor</th><th>Estado</th><th>Inicio</th><th>Vencimiento</th><th>Días restantes</th><th>Acciones</th></tr></thead>
+        <tbody id="tbLicencias"><tr><td colspan="7" class="empty-row">Cargando...</td></tr></tbody>
+      </table></div>
+    </div>
+
+    <!-- CÓDIGOS -->
+    <div class="page" id="page-codigos">
+      <div class="section-header">
+        <div>
+          <div class="section-title-sm">Códigos de registro</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;">Genera códigos para nuevos vendedores. Válidos por 10 minutos.</div>
+        </div>
+        <button class="btn-add" onclick="generarCodigo()">⚡ Generar nuevo código</button>
+      </div>
+      <div id="codigoActualBox" style="display:none;margin-bottom:24px;">
+        <div class="code-display-big">
+          <div style="font-size:11px;font-weight:700;color:var(--pink);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;">Código generado</div>
+          <div class="code-num" id="codigoActualNum">0000</div>
+          <div class="code-exp">Expira en 10 minutos</div>
+          <div class="code-timer-bar"><div class="code-timer-fill"></div></div>
+        </div>
+      </div>
+      <div class="section-header" style="margin-top:8px;"><div class="section-title-sm">Códigos generados recientemente</div><button class="btn-sm" onclick="loadCodigos()">↻ Actualizar</button></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Código</th><th>Estado</th><th>Usado por</th><th>Expira en</th><th>Generado</th></tr></thead>
+        <tbody id="tbCodigos"><tr><td colspan="5" class="empty-row">Cargando...</td></tr></tbody>
+      </table></div>
+    </div>
+
+    <!-- TRANSACCIONES -->
+    <div class="page" id="page-transacciones">
+      <div class="section-header">
+        <div class="section-title-sm">Historial de transacciones</div>
+        <button class="btn-add" onclick="openModal('addTransaccion')">+ Registrar pago</button>
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Vendedor</th><th>Monto</th><th>Método</th><th>Descripción</th><th>Fecha</th></tr></thead>
+        <tbody id="tbTransacciones"><tr><td colspan="5" class="empty-row">Cargando...</td></tr></tbody>
+      </table></div>
+    </div>
+
+    <!-- LOGS -->
+    <div class="page" id="page-logs">
+      <div class="section-header"><div class="section-title-sm">Registro de actividad</div><button class="btn-sm" onclick="loadLogs()">↻ Actualizar</button></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Fecha</th><th>Vendedor</th><th>Acción</th><th>Detalle</th><th>IP</th></tr></thead>
+        <tbody id="tbLogs"><tr><td colspan="5" class="empty-row">Cargando...</td></tr></tbody>
+      </table></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL ADD VENDEDOR -->
+<div class="modal-bg" id="modal-addVendedor">
+  <div class="modal">
+    <div class="modal-title">Agregar vendedor</div>
+    <div class="modal-sub">Información del nuevo vendedor</div>
+    <div id="addVendMsg" class="msg-box"></div>
+    <div class="form-group"><label class="form-label">Nombre completo</label><input class="form-input" id="vNombre" placeholder="Ej: Carlos Mendoza"></div>
+    <div class="form-group"><label class="form-label">Correo electrónico</label><input class="form-input" type="email" id="vCorreo" placeholder="carlos@correo.com"></div>
+    <div class="form-group"><label class="form-label">Contraseña temporal</label><input class="form-input" type="password" id="vPass" placeholder="Dejar vacío para que la cree"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div class="form-group"><label class="form-label">Licencia (días)</label><input class="form-input" type="number" id="vLicencia" value="30" min="1"></div>
+      <div class="form-group"><label class="form-label">Precio mensual (S/)</label><input class="form-input" type="number" id="vPrecio" value="29.90" step="0.01"></div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal('addVendedor')">Cancelar</button>
+      <button class="btn-confirm" onclick="addVendedor()">Guardar vendedor</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ADD TRANSACCION -->
+<div class="modal-bg" id="modal-addTransaccion">
+  <div class="modal">
+    <div class="modal-title">Registrar pago</div>
+    <div class="modal-sub">Ingresa los datos del pago recibido</div>
+    <div id="addTransMsg" class="msg-box"></div>
+    <div class="form-group"><label class="form-label">Vendedor</label><select class="form-select" id="transVendedor"></select></div>
+    <div class="form-group"><label class="form-label">Monto (S/)</label><input class="form-input" type="number" id="transMonto" placeholder="29.90" step="0.01"></div>
+    <div class="form-group">
+      <label class="form-label">Método de pago</label>
+      <select class="form-select" id="transMetodo">
+        <option value="yape">Yape</option>
+        <option value="plin">Plin</option>
+        <option value="transferencia">Transferencia</option>
+        <option value="efectivo">Efectivo</option>
+      </select>
+    </div>
+    <div class="form-group"><label class="form-label">Descripción</label><input class="form-input" id="transDesc" placeholder="Ej: Renovación 30 días"></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal('addTransaccion')">Cancelar</button>
+      <button class="btn-confirm" onclick="addTransaccion()">Registrar pago</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDIT VENDEDOR -->
+<div class="modal-bg" id="modal-editVendedor">
+  <div class="modal">
+    <div class="modal-title">Editar vendedor</div>
+    <div class="modal-sub" id="editVendSub"></div>
+    <div id="editVendMsg" class="msg-box"></div>
+    <input type="hidden" id="editVendId">
+    <div class="form-group">
+      <label class="form-label">Estado</label>
+      <select class="form-select" id="editVendEstado">
+        <option value="activo">Activo</option>
+        <option value="inactivo">Inactivo</option>
+        <option value="suspendido">Suspendido</option>
+      </select>
+    </div>
+    <div class="form-group"><label class="form-label">Renovar licencia (días desde hoy)</label><input class="form-input" type="number" id="editVendLicencia" placeholder="30"></div>
+    <div class="form-group"><label class="form-label">Precio mensual (S/)</label><input class="form-input" type="number" id="editVendPrecio" step="0.01"></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal('editVendedor')">Cancelar</button>
+      <button class="btn-confirm" onclick="saveEditVendedor()">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = 'https://TU-PROYECTO.vercel.app'; // ← Cambia esto
+let token = localStorage.getItem('admin_token');
+let allVendors = [];
+
+async function api(endpoint, opts={}) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = 'Bearer ' + token;
+  const r = await fetch(API + endpoint, { ...opts, headers });
+  return r.json();
+}
+
+async function init() {
+  document.getElementById('topDate').textContent = new Date().toLocaleDateString('es-PE',{day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  if (!token) { showLogin(); return; }
+  const d = await api('/api/auth?action=verify');
+  if (!d.ok || d.rol !== 'admin') { showLogin(); return; }
+  showPanel();
+}
+
+function showLogin() {
+  document.getElementById('loginWrap').style.display = 'flex';
+  document.getElementById('panelWrap').style.display = 'none';
+}
+
+async function doLogin() {
+  const correo = document.getElementById('adminEmail').value.trim();
+  const password = document.getElementById('adminPass').value;
+  const d = await api('/api/auth?action=admin-login', { method:'POST', body: JSON.stringify({correo,password}) });
+  if (d.ok) {
+    token = d.token;
+    localStorage.setItem('admin_token', token);
+    showPanel();
+  } else showMsg('loginMsg','err', d.error);
+}
+
+function logout() {
+  localStorage.removeItem('admin_token');
+  token = null;
+  showLogin();
+}
+
+function showPanel() {
+  document.getElementById('loginWrap').style.display = 'none';
+  document.getElementById('panelWrap').style.display = 'flex';
+  loadDashboard();
+}
+
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  event?.currentTarget?.classList.add('active');
+  const titles = { dashboard:'Dashboard',vendedores:'Vendedores',correos:'Correos principales',licencias:'Licencias',codigos:'Códigos de registro',transacciones:'Transacciones',logs:'Logs de actividad' };
+  document.getElementById('topTitle').textContent = titles[name] || name;
+  const loaders = { vendedores:loadVendedores, correos:loadCorreos, licencias:loadLicencias, codigos:loadCodigos, transacciones:loadTransacciones, logs:loadLogs };
+  if (loaders[name]) loaders[name]();
+}
+
+// DASHBOARD
+async function loadDashboard() {
+  const [stats, vends, logs] = await Promise.all([
+    api('/api/admin?action=stats'),
+    api('/api/admin?action=vendedores-list'),
+    api('/api/admin?action=logs'),
+  ]);
+  if (stats.ok) {
+    const s = stats.stats;
+    document.getElementById('dsVendedores').textContent = s.vendedores;
+    document.getElementById('dsPrincipales').textContent = s.principales;
+    document.getElementById('dsAlias').textContent = s.alias;
+    document.getElementById('dsLicencias').textContent = s.licencias_activas;
+    document.getElementById('dsIngresos').textContent = 'S/ ' + s.ingresos_mes.toFixed(2);
+  }
+  if (vends.ok) {
+    allVendors = vends.data || [];
+    const recent = allVendors.slice(0, 5);
+    document.getElementById('tbRecentVendors').innerHTML = recent.map(v => `
+      <tr>
+        <td><strong>${v.nombre}</strong><div style="font-size:10px;color:var(--muted)">${v.correo}</div></td>
+        <td><span class="badge ${v.estado}">${v.estado}</span></td>
+        <td style="font-size:11px;">${fmtDate(v.licencia_fin)}</td>
+        <td style="font-size:11px;color:var(--muted)">${fmtDate(v.creado_at)}</td>
+      </tr>`).join('') || '<tr><td colspan="4" class="empty-row">Sin vendedores</td></tr>';
+  }
+  if (logs.ok) {
+    const recent = (logs.data || []).slice(0,6);
+    document.getElementById('recentLogs').innerHTML = recent.map(l => `
+      <div class="recent-item">
+        <div class="recent-dot ${getDotClass(l.accion)}"></div>
+        <div style="flex:1"><div style="font-weight:600">${l.vendedor_nombre || 'Admin'}</div><div style="color:var(--muted)">${l.detalle || l.accion}</div></div>
+        <div style="font-size:10px;color:var(--muted)">${fmtDate(l.creado_at)}</div>
+      </div>`).join('') || '<div style="color:var(--muted);font-size:12px;text-align:center;padding:20px">Sin actividad</div>';
+  }
+}
+
+function getDotClass(accion) {
+  if (accion?.includes('add')) return 'add';
+  if (accion?.includes('delete')) return 'delete';
+  if (accion === 'login') return 'login';
+  return 'other';
+}
+
+// VENDEDORES
+async function loadVendedores() {
+  const d = await api('/api/admin?action=vendedores-list');
+  allVendors = d.data || [];
+  renderVendors(allVendors);
+  document.getElementById('vTotal').textContent = allVendors.length;
+  document.getElementById('vActivos').textContent = allVendors.filter(v=>v.estado==='activo').length;
+  document.getElementById('vInactivos').textContent = allVendors.filter(v=>v.estado==='inactivo').length;
+  document.getElementById('vSuspendidos').textContent = allVendors.filter(v=>v.estado==='suspendido').length;
+  // Cargar select de vendedores para transacciones
+  const sel = document.getElementById('transVendedor');
+  sel.innerHTML = allVendors.map(v=>`<option value="${v.id}">${v.nombre}</option>`).join('');
+}
+
+function renderVendors(list) {
+  document.getElementById('tbVendedores').innerHTML = list.map((v,i) => {
+    const dias = Math.max(0, Math.ceil((new Date(v.licencia_fin)-new Date())/86400000));
+    return `<tr>
+      <td>#${String(i+1).padStart(3,'0')}</td>
+      <td><strong>${v.nombre}</strong></td>
+      <td style="color:var(--muted)">${v.correo}</td>
+      <td><span class="badge ${v.estado}">${v.estado}</span></td>
+      <td><span class="badge ${dias>0?'active':'expirada'}">${dias>0?`${dias} días`:'Expirada'}</span></td>
+      <td>${v.principales||0}</td>
+      <td>${v.alias||0}</td>
+      <td style="color:var(--muted);font-size:11px">${fmtDate(v.creado_at)}</td>
+      <td style="display:flex;gap:6px">
+        <button class="btn-sm" onclick="editVendedor(${v.id},'${v.nombre}','${v.estado}',${v.precio_mensual})">✏️</button>
+        <button class="btn-sm danger" onclick="deleteVendedor(${v.id},'${v.nombre}')">🗑</button>
+      </td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="9" class="empty-row">No hay vendedores</td></tr>';
+}
+
+function filterVendors(q) {
+  const f = allVendors.filter(v => v.nombre.toLowerCase().includes(q.toLowerCase()) || v.correo.toLowerCase().includes(q.toLowerCase()));
+  renderVendors(f);
+}
+
+async function addVendedor() {
+  const nombre = document.getElementById('vNombre').value.trim();
+  const correo = document.getElementById('vCorreo').value.trim();
+  const password = document.getElementById('vPass').value || Math.random().toString(36).slice(-8);
+  const licencia_dias = parseInt(document.getElementById('vLicencia').value)||30;
+  const precio_mensual = parseFloat(document.getElementById('vPrecio').value)||29.90;
+  const d = await api('/api/admin?action=vendedor-add', { method:'POST', body: JSON.stringify({nombre,correo,password,licencia_dias,precio_mensual}) });
+  if (d.ok) { showMsg('addVendMsg','ok','✅ Vendedor creado correctamente.'); setTimeout(()=>{closeModal('addVendedor');loadVendedores();},1500); }
+  else showMsg('addVendMsg','err',d.error);
+}
+
+function editVendedor(id,nombre,estado,precio) {
+  document.getElementById('editVendId').value = id;
+  document.getElementById('editVendSub').textContent = nombre;
+  document.getElementById('editVendEstado').value = estado;
+  document.getElementById('editVendPrecio').value = precio;
+  openModal('editVendedor');
+}
+
+async function saveEditVendedor() {
+  const id = document.getElementById('editVendId').value;
+  const estado = document.getElementById('editVendEstado').value;
+  const licencia_dias = document.getElementById('editVendLicencia').value || null;
+  const precio_mensual = document.getElementById('editVendPrecio').value;
+  const d = await api('/api/admin?action=vendedor-update', { method:'PATCH', body: JSON.stringify({id,estado,licencia_dias,precio_mensual}) });
+  if (d.ok) { showMsg('editVendMsg','ok','✅ Actualizado.'); setTimeout(()=>{closeModal('editVendedor');loadVendedores();},1200); }
+  else showMsg('editVendMsg','err',d.error);
+}
+
+async function deleteVendedor(id, nombre) {
+  if (!confirm(`¿Eliminar al vendedor "${nombre}"? Esta acción no se puede deshacer.`)) return;
+  await api('/api/admin?action=vendedor-delete', { method:'DELETE', body: JSON.stringify({id}) });
+  loadVendedores();
+}
+
+// CORREOS
+async function loadCorreos() {
+  const d = await api('/api/admin?action=principales-list');
+  const list = d.data || [];
+  document.getElementById('tbCorreos').innerHTML = list.map(c => `
+    <tr>
+      <td>${c.correo}</td>
+      <td><span class="badge ${c.servicio}">${c.servicio}</span></td>
+      <td>${c.vendedor_nombre}</td>
+      <td><span class="badge ${c.activo?'active':'inactivo'}">${c.activo?'Activo':'Inactivo'}</span></td>
+      <td style="color:var(--muted);font-size:11px">${fmtDate(c.creado_at)}</td>
+    </tr>`).join('') || '<tr><td colspan="5" class="empty-row">Sin correos</td></tr>';
+}
+
+// LICENCIAS
+async function loadLicencias() {
+  const d = await api('/api/admin?action=vendedores-list');
+  const list = d.data || [];
+  document.getElementById('tbLicencias').innerHTML = list.map((v,i) => {
+    const dias = Math.max(0, Math.ceil((new Date(v.licencia_fin)-new Date())/86400000));
+    return `<tr>
+      <td>#${String(i+1).padStart(3,'0')}</td>
+      <td><strong>${v.nombre}</strong><div style="font-size:10px;color:var(--muted)">${v.correo}</div></td>
+      <td><span class="badge ${v.estado}">${v.estado}</span></td>
+      <td style="font-size:11px;color:var(--muted)">${fmtDate(v.creado_at)}</td>
+      <td style="font-size:11px">${fmtDate(v.licencia_fin)}</td>
+      <td><span class="badge ${dias>7?'active':dias>0?'inactivo':'expirada'}">${dias} días</span></td>
+      <td><button class="btn-sm success" onclick="editVendedor(${v.id},'${v.nombre}','${v.estado}',${v.precio_mensual})">Renovar</button></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="7" class="empty-row">Sin licencias</td></tr>';
+}
+
+// CODIGOS
+async function generarCodigo() {
+  const d = await api('/api/admin?action=codigo-generar', { method:'POST', body: JSON.stringify({}) });
+  if (d.ok) {
+    document.getElementById('codigoActualBox').style.display = 'block';
+    document.getElementById('codigoActualNum').textContent = d.data.codigo;
+    // Reiniciar animación
+    const fill = document.querySelector('.code-timer-fill');
+    fill.style.animation = 'none';
+    fill.offsetHeight;
+    fill.style.animation = 'countdown 600s linear forwards';
+    loadCodigos();
+  }
+}
+
+async function loadCodigos() {
+  const d = await api('/api/admin?action=codigos-list');
+  const list = d.data || [];
+  document.getElementById('tbCodigos').innerHTML = list.map(c => {
+    const exp = new Date(c.expira_at) > new Date();
+    const estado = c.usado ? 'usado' : exp ? 'activo-cod' : 'expirado-cod';
+    const estadoLabel = c.usado ? 'Usado' : exp ? 'Activo' : 'Expirado';
+    return `<tr>
+      <td style="font-size:20px;font-weight:800;color:var(--pink);letter-spacing:4px">${c.codigo}</td>
+      <td><span class="badge ${estado}">${estadoLabel}</span></td>
+      <td style="color:var(--muted)">${c.usado_por_nombre || '–'}</td>
+      <td style="font-size:11px">${fmtDate(c.expira_at)}</td>
+      <td style="font-size:11px;color:var(--muted)">${fmtDate(c.creado_at)}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="5" class="empty-row">Sin códigos generados</td></tr>';
+}
+
+// TRANSACCIONES
+async function loadTransacciones() {
+  const d = await api('/api/admin?action=transacciones-list');
+  document.getElementById('tbTransacciones').innerHTML = (d.data||[]).map(t => `
+    <tr>
+      <td>${t.vendedor_nombre}</td>
+      <td style="font-weight:700;color:var(--green)">S/ ${parseFloat(t.monto).toFixed(2)}</td>
+      <td style="text-transform:capitalize">${t.metodo}</td>
+      <td style="color:var(--muted)">${t.descripcion||'–'}</td>
+      <td style="font-size:11px;color:var(--muted)">${fmtDate(t.creado_at)}</td>
+    </tr>`).join('') || '<tr><td colspan="5" class="empty-row">Sin transacciones</td></tr>';
+}
+
+async function addTransaccion() {
+  const vendedor_id = document.getElementById('transVendedor').value;
+  const monto = document.getElementById('transMonto').value;
+  const metodo = document.getElementById('transMetodo').value;
+  const descripcion = document.getElementById('transDesc').value;
+  const d = await api('/api/admin?action=transaccion-add', { method:'POST', body: JSON.stringify({vendedor_id,monto,metodo,descripcion}) });
+  if (d.ok) { showMsg('addTransMsg','ok','✅ Pago registrado.'); setTimeout(()=>{closeModal('addTransaccion');loadTransacciones();},1500); }
+  else showMsg('addTransMsg','err',d.error);
+}
+
+// LOGS
+async function loadLogs() {
+  const d = await api('/api/admin?action=logs');
+  document.getElementById('tbLogs').innerHTML = (d.data||[]).map(l => `
+    <tr>
+      <td style="font-size:11px;color:var(--muted)">${fmtDate(l.creado_at)}</td>
+      <td>${l.vendedor_nombre||'Admin'}</td>
+      <td style="color:var(--cyan)">${l.accion}</td>
+      <td style="color:var(--muted);font-size:12px">${l.detalle||'–'}</td>
+      <td style="font-size:11px;color:var(--muted)">${l.ip||'–'}</td>
+    </tr>`).join('') || '<tr><td colspan="5" class="empty-row">Sin actividad</td></tr>';
+}
+
+// UTILS
+function openModal(id) { document.getElementById('modal-'+id).classList.add('open'); }
+function closeModal(id) { document.getElementById('modal-'+id).classList.remove('open'); }
+function showMsg(id,type,text) {
+  const el = document.getElementById(id);
+  el.className='msg-box '+type; el.textContent=text; el.style.display='block';
+  if(type) setTimeout(()=>el.style.display='none',4000);
+}
+function fmtDate(d) {
+  if (!d) return '–';
+  return new Date(d).toLocaleDateString('es-PE',{day:'2-digit',month:'short',year:'numeric'});
+}
+
+init();
+</script>
+</body>
+</html>
