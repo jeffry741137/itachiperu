@@ -116,6 +116,16 @@ module.exports = async function handler(req, res) {
       return res.status(401).json({ error: 'Token inválido.' });
     }
   }
-
+// ── SETUP ADMIN ──
+if (action === 'setup') {
+  const { password } = body;
+  if (!password) return res.json({ error: 'Falta contraseña.' });
+  const hash = await bcrypt.hash(password, 10);
+  await pool.query(
+    'INSERT INTO admin (correo, password_hash) VALUES ($1,$2) ON CONFLICT (correo) DO UPDATE SET password_hash=$2',
+    ['admin@itachiperu.com', hash]
+  );
+  return res.json({ ok: true, mensaje: 'Admin configurado.' });
+}
   return res.status(405).json({ error: 'Acción no válida.' });
 };
