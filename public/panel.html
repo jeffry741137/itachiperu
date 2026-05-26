@@ -176,7 +176,11 @@ tr:hover td{background:rgba(255,255,255,0.02);}
     <div class="form-group"><label class="form-label">Nombre completo</label><input class="form-input" type="text" id="regNombre" placeholder="Tu nombre completo"></div>
     <div class="form-group"><label class="form-label">Correo electrónico</label><input class="form-input" type="email" id="regEmail" placeholder="ejemplo@correo.com"></div>
     <div class="form-group"><label class="form-label">Contraseña</label><input class="form-input" type="password" id="regPass" placeholder="Crea una contraseña"></div>
-    <div class="form-group"><label class="form-label">Código de invitación (opcional)</label><input class="form-input" type="text" id="regCodigo" placeholder="Ingresa el código de invitación"></div>
+    <div class="form-group">
+      <label class="form-label">Código de registro <span style="color:var(--pink)">*</span></label>
+      <input class="form-input" type="text" id="regCodigo" placeholder="Pide al creador tu código de registro">
+      <div style="font-size:11px;color:var(--muted);margin-top:5px;">💡 Contacta al administrador para obtener tu código</div>
+    </div>
     <button class="btn-add" style="width:100%;justify-content:center;padding:14px;font-size:15px;" onclick="doRegister()">Crear cuenta →</button>
     <div class="login-link">¿Ya tienes cuenta? <a href="#" onclick="showLogin()">Iniciar sesión</a></div>
   </div>
@@ -355,7 +359,7 @@ tr:hover td{background:rgba(255,255,255,0.02);}
 </div>
 
 <script>
-const API = 'https://itachiperu.vercel.app/'; // ← Cambia esto
+const API = 'https://TU-PROYECTO.vercel.app'; // ← Cambia esto
 let token = localStorage.getItem('vendor_token');
 let vendedor = null;
 let selectedColor = '#ff2d78';
@@ -407,6 +411,10 @@ async function doRegister() {
   const correo = document.getElementById('regEmail').value.trim();
   const password = document.getElementById('regPass').value;
   const codigo_invitacion = document.getElementById('regCodigo').value.trim();
+  if (!codigo_invitacion) {
+    showMsg('regMsg','err','❌ El código de registro es obligatorio. Pide al administrador.');
+    return;
+  }
   const data = await api('/api/auth?action=registro', { method:'POST', body: JSON.stringify({nombre,correo,password,codigo_invitacion}) });
   if (data.ok) {
     token = data.token;
