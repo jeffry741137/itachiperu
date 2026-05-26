@@ -147,7 +147,8 @@ tr:hover td{background:rgba(255,255,255,0.015);}
       <div class="nav-item active" onclick="showPage('dashboard')">📊 Dashboard</div>
       <div class="nav-group">Gestión</div>
       <div class="nav-item" onclick="showPage('vendedores')">👥 Vendedores</div>
-      <div class="nav-item" onclick="showPage('correos')">✉️ Correos</div>
+      <div class="nav-item" onclick="showPage('correos')">✉️ Correos principales</div>
+      <div class="nav-item" onclick="showPage('alias')">📧 Correos alias</div>
       <div class="nav-item" onclick="showPage('licencias')">🛡️ Licencias</div>
       <div class="nav-group">Sistema</div>
       <div class="nav-item" onclick="showPage('codigos')">🔑 Códigos de registro</div>
@@ -214,8 +215,17 @@ tr:hover td{background:rgba(255,255,255,0.015);}
     <div class="page" id="page-correos">
       <div class="section-header"><div class="section-title-sm">Todos los correos principales</div></div>
       <div class="table-wrap"><table>
-        <thead><tr><th>Correo</th><th>Servicio</th><th>Vendedor</th><th>Estado</th><th>Agregado</th></tr></thead>
-        <tbody id="tbCorreos"><tr><td colspan="5" class="empty-row">Cargando...</td></tr></tbody>
+        <thead><tr><th>Correo</th><th>Contraseña App</th><th>Servicio</th><th>Vendedor</th><th>Estado</th><th>Agregado</th><th>Acciones</th></tr></thead>
+        <tbody id="tbCorreos"><tr><td colspan="7" class="empty-row">Cargando...</td></tr></tbody>
+      </table></div>
+    </div>
+
+    <!-- ALIAS -->
+    <div class="page" id="page-alias">
+      <div class="section-header"><div class="section-title-sm">Todos los correos alias</div><button class="btn-sm" onclick="loadAlias()">↻ Actualizar</button></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Alias</th><th>Correo principal</th><th>Servicio</th><th>Vendedor</th><th>Estado</th><th>Acciones</th></tr></thead>
+        <tbody id="tbAlias"><tr><td colspan="6" class="empty-row">Cargando...</td></tr></tbody>
       </table></div>
     </div>
 
@@ -346,7 +356,7 @@ tr:hover td{background:rgba(255,255,255,0.015);}
 </div>
 
 <script>
-const API = 'https://itachiperu.vercel.app/'; // ← Cambia esto
+const API = 'https://TU-PROYECTO.vercel.app'; // ← Cambia esto
 let token = localStorage.getItem('admin_token');
 let allVendors = [];
 
@@ -529,11 +539,48 @@ async function loadCorreos() {
   document.getElementById('tbCorreos').innerHTML = list.map(c => `
     <tr>
       <td>${c.correo}</td>
+      <td>
+        <span style="font-family:monospace;font-size:11px;cursor:pointer;color:var(--cyan)" onclick="togglePass(this,'${c.password_app}')">
+          ••••••••••••
+        </span>
+      </td>
       <td><span class="badge ${c.servicio}">${c.servicio}</span></td>
       <td>${c.vendedor_nombre}</td>
       <td><span class="badge ${c.activo?'active':'inactivo'}">${c.activo?'Activo':'Inactivo'}</span></td>
       <td style="color:var(--muted);font-size:11px">${fmtDate(c.creado_at)}</td>
-    </tr>`).join('') || '<tr><td colspan="5" class="empty-row">Sin correos</td></tr>';
+      <td><button class="btn-sm danger" onclick="deletePrincipalAdmin(${c.id})">🗑</button></td>
+    </tr>`).join('') || '<tr><td colspan="7" class="empty-row">Sin correos</td></tr>';
+}
+
+async function deletePrincipalAdmin(id) {
+  if (!confirm('¿Eliminar este correo principal? También se eliminarán sus alias.')) return;
+  const d = await api('/api/admin?action=principal-delete', { method:'DELETE', body: JSON.stringify({id}) });
+  if (d.ok) { showToast('✅ Correo eliminado.'); loadCorreos(); }
+}
+
+function togglePass(el, pass) {
+  el.textContent = el.textContent.includes('•') ? pass : '••••••••••••';
+}
+
+// ALIAS
+async function loadAlias() {
+  const d = await api('/api/admin?action=alias-list');
+  const list = d.data || [];
+  document.getElementById('tbAlias').innerHTML = list.map(a => `
+    <tr>
+      <td>${a.alias}</td>
+      <td style="font-size:11px;color:var(--muted)">${a.principal}</td>
+      <td><span class="badge ${a.servicio}">${a.servicio}</span></td>
+      <td>${a.vendedor_nombre}</td>
+      <td><span class="badge ${a.activo?'active':'inactivo'}">${a.activo?'Activo':'Inactivo'}</span></td>
+      <td><button class="btn-sm danger" onclick="deleteAliasAdmin(${a.id})">🗑</button></td>
+    </tr>`).join('') || '<tr><td colspan="6" class="empty-row">Sin alias</td></tr>';
+}
+
+async function deleteAliasAdmin(id) {
+  if (!confirm('¿Eliminar este alias?')) return;
+  const d = await api('/api/admin?action=alias-delete', { method:'DELETE', body: JSON.stringify({id}) });
+  if (d.ok) { showToast('✅ Alias eliminado.'); loadAlias(); }
 }
 
 // LICENCIAS
@@ -633,6 +680,14 @@ function showMsg(id,type,text) {
 function fmtDate(d) {
   if (!d) return '–';
   return new Date(d).toLocaleDateString('es-PE',{day:'2-digit',month:'short',year:'numeric'});
+}
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#0d0a18;border:1px solid rgba(0,229,160,0.3);color:#00e5a0;padding:12px 20px;border-radius:12px;font-size:13px;font-weight:700;z-index:999;font-family:Outfit,sans-serif;';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
 }
 
 init();
