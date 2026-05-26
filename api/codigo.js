@@ -25,51 +25,75 @@ function buscarEmailsImap(palabrasClave, aliasCliente, imapUser, imapPass) {
     const diezMin = new Date(ahora.getTime() - 10 * 60 * 1000);
     const fechaImap = diezMin.toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' }).replace(',', '');
 
-    const carpetas = ['INBOX', 'INBOX.Principal', 'INBOX.Transacciones', 'INBOX.Novedades', 'INBOX.Promociones'];
-
     function buscarEnCarpeta(carpeta) {
       return new Promise((resolveBox) => {
         imap.openBox(carpeta, true, (err) => {
           if (err) return resolveBox([]);
           imap.search(['ALL', ['SINCE', fechaImap]], (err, uids) => {
             if (err || !uids || uids.length === 0) return resolveBox([]);
-            const fetch = imap.fetch(uids.slice(-10), { bodies: '' });
+            const fetch = imap.fetch(uids.slice(-15), { bodies: '' });
             const emails = [];
+            const parsePromises = [];
             fetch.on('message', (msg) => {
               let buffer = '';
               msg.on('body', (stream) => {
                 stream.on('data', (chunk) => { buffer += chunk.toString('utf8'); });
                 stream.once('end', () => {
-                  simpleParser(buffer).then(p => emails.push(p)).catch(() => {});
+                  const p = simpleParser(buffer).then(parsed => emails.push(parsed)).catch(() => {});
+                  parsePromises.push(p);
                 });
               });
             });
             fetch.once('error', () => resolveBox([]));
-            fetch.once('end', () => setTimeout(() => resolveBox(emails), 800));
+            fetch.once('end', () => {
+              setTimeout(async () => {
+                await Promise.allSettled(parsePromises);
+                resolveBox(emails);
+              }, 1500);
+            });
           });
         });
       });
     }
 
-    imap.once('ready', async () => {
-      try {
-        let todos = [];
-        for (const carpeta of carpetas) {
-          const mails = await buscarEnCarpeta(carpeta).catch(() => []);
-          todos = todos.concat(mails);
+    imap.once('ready', () => {
+      // Listar todas las carpetas reales y buscar en ellas
+      imap.getBoxes((err, boxes) => {
+        const carpetas = ['INBOX'];
+        if (!err && boxes) {
+          // Agregar subcarpetas de INBOX si existen
+          if (boxes.INBOX && boxes.INBOX.children) {
+            Object.keys(boxes.INBOX.children).forEach(sub => {
+              carpetas.push('INBOX.' + sub);
+            });
+          }
+          // También buscar en carpetas de nivel raíz comunes
+          ['Novedades','Transacciones','Promociones','Principal'].forEach(f => {
+            if (boxes[f]) carpetas.push(f);
+          });
         }
-        imap.end();
-        const filtrados = todos.filter(mail => {
-          const fecha = mail.date ? new Date(mail.date) : new Date(0);
-          if (fecha < limite) return false;
-          const asunto = (mail.subject || '').toLowerCase();
-          if (!palabrasClave.some(p => asunto.includes(p.toLowerCase()))) return false;
-          const cuerpo = (mail.text || '') + ' ' + (mail.html || '');
-          return cuerpo.toLowerCase().includes(aliasCliente.toLowerCase());
-        });
-        filtrados.sort((a, b) => new Date(b.date) - new Date(a.date));
-        resolve(filtrados);
-      } catch (e) { imap.end(); resolve([]); }
+
+        (async () => {
+          try {
+            let todos = [];
+            for (const carpeta of carpetas) {
+              const mails = await buscarEnCarpeta(carpeta).catch(() => []);
+              todos = todos.concat(mails);
+            }
+            imap.end();
+            const filtrados = todos.filter(mail => {
+              const fecha = mail.date ? new Date(mail.date) : new Date(0);
+              if (fecha < limite) return false;
+              const asunto = (mail.subject || '').toLowerCase();
+              if (!palabrasClave.some(p => asunto.includes(p.toLowerCase()))) return false;
+              const cuerpo = (mail.text || '') + ' ' + (mail.html || '');
+              return cuerpo.toLowerCase().includes(aliasCliente.toLowerCase());
+            });
+            filtrados.sort((a, b) => new Date(b.date) - new Date(a.date));
+            resolve(filtrados);
+          } catch (e) { imap.end(); resolve([]); }
+        })();
+      });
     });
     imap.once('error', (err) => reject(err));
     imap.connect();
