@@ -124,12 +124,40 @@ module.exports = async function handler(req, res) {
 
   // ── TODOS LOS CORREOS PRINCIPALES ──
   if (action === 'principales-list') {
-    const { rows } = await pool.query(
-      `SELECT cp.*, v.nombre as vendedor_nombre 
-       FROM correos_principales cp 
-       JOIN vendedores v ON v.id=cp.vendedor_id 
-       ORDER BY cp.creado_at DESC`
-    );
+    const { vendedor_id } = req.query;
+    const q = vendedor_id
+      ? 'SELECT cp.*, v.nombre as vendedor_nombre FROM correos_principales cp JOIN vendedores v ON v.id=cp.vendedor_id WHERE cp.vendedor_id=$1 ORDER BY cp.creado_at DESC'
+      : 'SELECT cp.*, v.nombre as vendedor_nombre FROM correos_principales cp JOIN vendedores v ON v.id=cp.vendedor_id ORDER BY cp.creado_at DESC';
+    const params = vendedor_id ? [vendedor_id] : [];
+    const { rows } = await pool.query(q, params);
+    // password_app visible solo para admin (ya estamos en endpoint admin autenticado)
+    return res.json({ ok: true, data: rows });
+  }
+
+  // ── ELIMINAR CORREOS PRINCIPALES DE VENDEDOR ──
+  if (action === 'principal-delete') {
+    const { id } = body;
+    await pool.query('DELETE FROM correos_principales WHERE id=$1', [id]);
+    await pool.query('INSERT INTO logs (accion,detalle) VALUES ($1,$2)', ['admin_delete_principal', `ID: ${id}`]);
+    return res.json({ ok: true });
+  }
+
+  // ── ELIMINAR ALIAS DE VENDEDOR ──
+  if (action === 'alias-delete') {
+    const { id } = body;
+    await pool.query('DELETE FROM correos_alias WHERE id=$1', [id]);
+    await pool.query('INSERT INTO logs (accion,detalle) VALUES ($1,$2)', ['admin_delete_alias', `ID: ${id}`]);
+    return res.json({ ok: true });
+  }
+
+  // ── LISTAR ALIAS DE UN VENDEDOR ──
+  if (action === 'alias-list') {
+    const { vendedor_id } = req.query;
+    const q = vendedor_id
+      ? 'SELECT ca.*, cp.correo as principal FROM correos_alias ca JOIN correos_principales cp ON cp.id=ca.correo_principal_id WHERE ca.vendedor_id=$1 ORDER BY ca.creado_at DESC'
+      : 'SELECT ca.*, cp.correo as principal, v.nombre as vendedor_nombre FROM correos_alias ca JOIN correos_principales cp ON cp.id=ca.correo_principal_id JOIN vendedores v ON v.id=ca.vendedor_id ORDER BY ca.creado_at DESC';
+    const params = vendedor_id ? [vendedor_id] : [];
+    const { rows } = await pool.query(q, params);
     return res.json({ ok: true, data: rows });
   }
 
