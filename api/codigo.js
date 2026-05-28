@@ -155,23 +155,25 @@ module.exports = async function handler(req, res) {
 
   const correoLower = correo.toLowerCase().trim();
 
-  // Buscar alias en la BD y obtener el correo principal con sus credenciales
-  let query = `
+  // Buscar alias en la BD - SIEMPRE filtrando por slug del vendedor
+  // Si no viene slug, el alias no puede ser usado (seguridad)
+  if (!slug) {
+    return res.json({ error: 'Acceso no válido. Usa el link de tu vendedor.' });
+  }
+
+  const { rows } = await pool.query(`
     SELECT ca.alias, ca.servicio, cp.correo as icloud_user, cp.password_app as icloud_pass
     FROM correos_alias ca
     JOIN correos_principales cp ON cp.id = ca.correo_principal_id
     JOIN vendedores v ON v.id = ca.vendedor_id
-    WHERE ca.alias = $1 AND ca.activo = TRUE AND cp.activo = TRUE AND v.estado = 'activo' AND v.licencia_fin > NOW()
-  `;
-  const params = [correoLower];
+    WHERE ca.alias = $1 
+      AND v.slug = $2
+      AND ca.activo = TRUE 
+      AND cp.activo = TRUE 
+      AND v.estado = 'activo' 
+      AND v.licencia_fin > NOW()
+  `, [correoLower, slug]);
 
-  // Si viene slug del vendedor, filtrar por él también
-  if (slug) {
-    query += ' AND v.slug = $2';
-    params.push(slug);
-  }
-
-  const { rows } = await pool.query(query, params);
   const cuenta = rows[0];
 
   if (!cuenta) return res.json({ error: 'Correo no registrado o licencia expirada.' });
