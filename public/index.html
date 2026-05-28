@@ -132,6 +132,10 @@ input[type=text]:focus,input[type=email]:focus{border-color:var(--pink);}
 .btn-copy{width:100%;padding:14px;background:linear-gradient(135deg,var(--pink),var(--purple));border:none;border-radius:12px;font-size:15px;font-weight:700;color:#fff;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .3s;margin-bottom:10px;}
 .btn-copy:hover{opacity:.9;}
 .btn-retry{width:100%;padding:12px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:12px;font-size:14px;font-weight:600;color:var(--muted);cursor:pointer;font-family:'Outfit',sans-serif;transition:all .3s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-open{width:100%;padding:14px;background:linear-gradient(135deg,#00d4ff,#7c3aed);border:none;border-radius:12px;font-size:15px;font-weight:700;color:#fff;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .3s;margin-bottom:10px;}
+.btn-open:hover{opacity:.9;}
+.btn-copy-small{width:100%;padding:12px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:12px;font-size:14px;font-weight:600;color:var(--muted);cursor:pointer;font-family:'Outfit',sans-serif;margin-bottom:10px;transition:all .2s;}
+.btn-copy-small:hover{border-color:rgba(255,45,120,0.3);color:var(--text);}
 .btn-retry:hover{border-color:rgba(255,45,120,0.3);color:var(--text);}
 .how-to{background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-top:16px;font-size:12px;color:var(--muted);}
 .how-to strong{color:var(--text);display:flex;align-items:center;gap:6px;margin-bottom:6px;font-size:13px;}
@@ -219,14 +223,33 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:32
 .payment-badge{padding:8px 16px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;font-size:12px;font-weight:700;color:var(--muted);}
 
 @media(max-width:900px){
-  .hero{grid-template-columns:1fr;padding:100px 24px 60px;}
-  .hero-right{display:none;}
-  section{padding:60px 24px;}
+  .hero{grid-template-columns:1fr;padding:90px 16px 40px;gap:24px;}
+  .hero-right{display:block;}
+  .hero-left{text-align:center;}
+  .hero-left .btn-start{width:100%;justify-content:center;}
+  .hero-left .payment-logos{justify-content:center;}
+  .hero-left .hero-badges{justify-content:center;}
+  .wizard-card{padding:20px 16px;}
+  .services-grid{grid-template-columns:1fr 1fr;gap:10px;}
+  .service-card{padding:14px 10px;}
+  .service-logo{font-size:24px;}
+  .service-name{font-size:13px;}
+  .code-digits{gap:5px;}
+  .code-digit{width:38px;height:50px;font-size:24px;}
+  section{padding:40px 16px;}
   .steps-grid{grid-template-columns:1fr 1fr;}
   .contact-grid{grid-template-columns:1fr;}
   footer{flex-direction:column;gap:16px;padding:24px;text-align:center;}
-  nav{padding:12px 20px;}
+  nav{padding:12px 16px;}
   .nav-links{display:none;}
+  .stats-grid{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:480px){
+  .wizard-steps{gap:2px;}
+  .step-label{font-size:9px;}
+  .step-circle{width:22px;height:22px;font-size:10px;}
+  .type-card{padding:12px 14px;}
+  .type-icon{width:36px;height:36px;font-size:16px;}
 }
 </style>
 </head>
@@ -379,6 +402,7 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:32
             <div id="codeContent"></div>
             <div class="code-timer">⏱ Este código expirará en 10:00 minutos</div>
           </div>
+          <div id="btnOpenWrap" style="display:none"><button class="btn-open" id="btnOpen" onclick="openLink()">🚀 Abrir link</button></div>
           <button class="btn-copy" id="btnCopy" onclick="copyCode()">📋 Copiar código</button>
           <button class="btn-retry" onclick="goStep(3);getCode()">↻ Generar nuevo código</button>
           <div class="how-to" id="howToBox"></div>
@@ -515,6 +539,7 @@ var currentType = "";
 var currentEmail = "";
 var vendorSlug = "";
 var codigoActual = "";
+var codigoTipo = "";
 
 async function loadVendor() {
   var params = new URLSearchParams(window.location.search);
@@ -549,9 +574,11 @@ async function loadVendor() {
 
 var TYPES = {
   netflix: [
-    { id: "netflix_hogar", icon: "🏠", cls: "hogar", name: "Código Hogar", desc: "Actualizar ubicación de tu cuenta", summary: "Código Hogar (Link)" },
-    { id: "netflix_login", icon: "🔑", cls: "login", name: "Inicio de Sesión", desc: "Código de 4 dígitos para iniciar sesión", summary: "Inicio de Sesión" },
-    { id: "netflix_pass", icon: "🔒", cls: "pass", name: "Cambiar Contraseña", desc: "Código de 6 dígitos para restablecer", summary: "Cambiar Contraseña" }
+    { id: "netflix_hogar",    icon: "🏠", cls: "hogar", name: "Código Hogar",          desc: "Actualizar ubicación de tu cuenta",        summary: "Código Hogar (Link)" },
+    { id: "netflix_login",    icon: "🔑", cls: "login", name: "Inicio de Sesión",       desc: "Código de 4 dígitos para iniciar sesión",  summary: "Inicio de Sesión" },
+    { id: "netflix_pass",     icon: "🔒", cls: "pass",  name: "Cambiar Contraseña",     desc: "Link para restablecer tu contraseña",      summary: "Cambiar Contraseña" },
+    { id: "netflix_pin",      icon: "🔢", cls: "login", name: "PIN de Perfil",          desc: "Código de 6 dígitos de verificación",      summary: "PIN de Perfil" },
+    { id: "netflix_temporal", icon: "⏱",  cls: "hogar", name: "Código Temporal Hogar", desc: "Link de acceso temporal a tu hogar",       summary: "Código Temporal Hogar" }
   ],
   disney: [
     { id: "disney", icon: "✨", cls: "login", name: "Inicio de Sesión", desc: "Código de 4 dígitos para tu cuenta", summary: "Inicio de Sesión" }
@@ -611,38 +638,61 @@ function goStep(n) {
   }
 }
 
-function startWizard() { goStep(1); }
+function startWizard() {
+  var wizardEl = document.querySelector(".wizard-card");
+  if (wizardEl) wizardEl.scrollIntoView({ behavior: "smooth" });
+  goStep(1);
+}
 function getCode() { goStep(4); }
+
+function limpiarLink(url) {
+  // Eliminar caracteres inválidos al final del link
+  return url.replace(/[\]"'\s>\)]+$/, "").trim();
+}
 
 async function fetchCode() {
   document.getElementById("loadingBox").style.display = "flex";
   document.getElementById("resultBox").style.display = "none";
   document.getElementById("errorBox").style.display = "none";
+  document.getElementById("btnOpenWrap").style.display = "none";
+
   try {
     var url = API_BASE + "/api/codigo?servicio=" + encodeURIComponent(currentType) + "&correo=" + encodeURIComponent(currentEmail);
     if (vendorSlug) url += "&slug=" + encodeURIComponent(vendorSlug);
     var res = await fetch(url);
     var data = await res.json();
     document.getElementById("loadingBox").style.display = "none";
+
     if (data.success) {
-      codigoActual = data.valor;
+      codigoActual = limpiarLink(data.valor);
+      codigoTipo = data.tipo;
       document.getElementById("resultBox").style.display = "block";
+
       if (data.tipo === "codigo") {
-        var digits = data.valor.toString().split("");
+        var digits = codigoActual.toString().split("");
         var digitsHtml = digits.map(function(d) { return "<div class='code-digit'>" + d + "</div>"; }).join("");
         document.getElementById("codeContent").innerHTML = "<div class='code-digits'>" + digitsHtml + "</div>";
-        document.getElementById("codeLabel").textContent = currentType === "disney" ? "Inicio de Sesión - Disney+" : "Inicio de Sesión - Netflix";
-        document.getElementById("resultTitle").textContent = "¡Tu código está listo!";
-        document.getElementById("resultSub").textContent = "Usa este código de " + digits.length + " dígitos para iniciar sesión.";
+        var labels = { netflix_login: "Inicio de Sesión - Netflix", netflix_pin: "PIN de Perfil - Netflix", disney: "Inicio de Sesión - Disney+" };
+        document.getElementById("codeLabel").textContent = labels[currentType] || "Código";
+        var titles = { netflix_login: "¡Tu código de inicio de sesión!", netflix_pin: "¡Tu PIN de perfil!", disney: "¡Tu código de inicio de sesión!" };
+        document.getElementById("resultTitle").textContent = titles[currentType] || "¡Tu código está listo!";
+        document.getElementById("resultSub").textContent = "Usa este código de " + digits.length + " dígitos para acceder a tu cuenta.";
         document.getElementById("btnCopy").textContent = "📋 Copiar código";
-        document.getElementById("howToBox").innerHTML = "<strong>💡 ¿Cómo usar este código?</strong> Ingresa este código en la pantalla de inicio de sesión.";
+        document.getElementById("btnOpenWrap").style.display = "none";
+        var howTo = { netflix_login: "Ingresa este código en la pantalla de inicio de sesión de Netflix.", netflix_pin: "Ingresa este PIN en la sección de verificación de Netflix.", disney: "Ingresa este código en la pantalla de inicio de sesión de Disney+." };
+        document.getElementById("howToBox").innerHTML = "<strong>💡 ¿Cómo usar este código?</strong> " + (howTo[currentType] || "Ingresa este código en la pantalla correspondiente.");
       } else {
-        document.getElementById("codeContent").innerHTML = "<div class='code-link'>" + data.valor + "</div>";
-        document.getElementById("codeLabel").textContent = "Código Hogar - Netflix";
-        document.getElementById("resultTitle").textContent = "¡Tu link de Netflix está listo!";
-        document.getElementById("resultSub").textContent = "Usa este link para acceder a tu cuenta de hogar.";
+        document.getElementById("codeContent").innerHTML = "<div class='code-link' style='word-break:break-all;font-size:12px;color:#00d4ff;line-height:1.5'>" + codigoActual + "</div>";
+        var linkLabels = { netflix_hogar: "Código Hogar - Netflix", netflix_pass: "Cambiar Contraseña - Netflix", netflix_temporal: "Código Temporal Hogar - Netflix" };
+        document.getElementById("codeLabel").textContent = linkLabels[currentType] || "Link";
+        var linkTitles = { netflix_hogar: "¡Tu link de Netflix está listo!", netflix_pass: "¡Tu link para cambiar contraseña!", netflix_temporal: "¡Tu código temporal está listo!" };
+        document.getElementById("resultTitle").textContent = linkTitles[currentType] || "¡Tu link está listo!";
+        var linkSubs = { netflix_hogar: "Usa este link para acceder a tu cuenta de hogar.", netflix_pass: "Abre este link para restablecer tu contraseña de Netflix.", netflix_temporal: "Usa este link de acceso temporal a tu cuenta." };
+        document.getElementById("resultSub").textContent = linkSubs[currentType] || "Abre este link en tu navegador.";
         document.getElementById("btnCopy").textContent = "📋 Copiar link";
-        document.getElementById("howToBox").innerHTML = "<strong>💡 ¿Cómo usar este link?</strong> Abre el link en tu navegador e inicia sesión en la sección Hogar de tu cuenta Netflix.";
+        document.getElementById("btnOpenWrap").style.display = "block";
+        var howToLink = { netflix_hogar: "Abre el link en tu navegador e inicia sesión en la sección Hogar.", netflix_pass: "Abre el link, ingresa tu nueva contraseña y confirma el cambio.", netflix_temporal: "Abre el link para obtener acceso temporal a tu cuenta de hogar." };
+        document.getElementById("howToBox").innerHTML = "<strong>💡 ¿Cómo usar este link?</strong> " + (howToLink[currentType] || "Abre el link en tu navegador.");
       }
     } else {
       document.getElementById("errorBox").style.display = "block";
@@ -657,8 +707,16 @@ async function fetchCode() {
 
 function copyCode() {
   navigator.clipboard.writeText(codigoActual);
-  document.getElementById("btnCopy").textContent = "✅ ¡Copiado!";
-  setTimeout(function() { document.getElementById("btnCopy").textContent = "📋 Copiar código"; }, 2000);
+  var btn = document.getElementById("btnCopy");
+  var orig = btn.textContent;
+  btn.textContent = "✅ ¡Copiado!";
+  setTimeout(function() { btn.textContent = orig; }, 2000);
+}
+
+function openLink() {
+  if (codigoActual && codigoTipo === "link") {
+    window.open(codigoActual, "_blank");
+  }
 }
 
 loadVendor();
