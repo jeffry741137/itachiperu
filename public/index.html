@@ -509,103 +509,104 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:32
 </footer>
 
 <script>
-const API_BASE = 'https://itachiperu.vercel.app';
-let currentService = '';
-let currentType = '';
-let currentEmail = '';
-let vendorSlug = '';
-let codigoActual = '';
+var API_BASE = "https://itachiperu.vercel.app";
+var currentService = "";
+var currentType = "";
+var currentEmail = "";
+var vendorSlug = "";
+var codigoActual = "";
 
 async function loadVendor() {
-  const params = new URLSearchParams(window.location.search);
-  const slug = params.get('v') || params.get('vendor');
-
+  var params = new URLSearchParams(window.location.search);
+  var slug = params.get("v") || params.get("vendor");
   if (!slug) {
-    document.querySelector('.hero-left').innerHTML = '<div style="text-align:center;padding:60px 0"><div style="font-size:64px;margin-bottom:24px">🔒</div><h2 style="font-size:28px;font-weight:800;margin-bottom:12px">Acceso no válido</h2><p style="color:#7a6a8a;font-size:16px;line-height:1.6">Para acceder necesitas el link personalizado de tu vendedor.</p></div>';
-    document.querySelector('.hero-right').style.display = 'none';
+    document.querySelector(".hero-left").innerHTML = "<div style='text-align:center;padding:60px 0'><div style='font-size:64px;margin-bottom:24px'>🔒</div><h2 style='font-size:28px;font-weight:800;margin-bottom:12px'>Acceso no válido</h2><p style='color:#7a6a8a;font-size:16px;line-height:1.6'>Para acceder necesitas el link personalizado de tu vendedor.</p></div>";
+    document.querySelector(".hero-right").style.display = "none";
     return;
   }
-
   vendorSlug = slug;
   try {
-    const res = await fetch(API_BASE + '/api/vendedor-info?slug=' + slug);
-    const data = await res.json();
+    var res = await fetch(API_BASE + "/api/vendedor-info?slug=" + slug);
+    var data = await res.json();
     if (data.ok && data.vendedor) {
-      const v = data.vendedor;
-      document.title = v.nombre.toUpperCase() + ' — ItachiPeru';
-      document.getElementById('vendorName').textContent = v.nombre.toUpperCase();
-      document.querySelector(':root').style.setProperty('--vendor-color', v.color || '#ff2d78');
-      const avatarEl = document.getElementById('vendorAvatar');
+      var v = data.vendedor;
+      document.title = v.nombre.toUpperCase() + " — ItachiPeru";
+      document.getElementById("vendorName").textContent = v.nombre.toUpperCase();
+      document.querySelector(":root").style.setProperty("--vendor-color", v.color || "#ff2d78");
+      var avatarEl = document.getElementById("vendorAvatar");
       if (v.foto_url) {
-        avatarEl.outerHTML = '<img src="' + v.foto_url + '" class="vendor-avatar" id="vendorAvatar" alt="' + v.nombre + '">';
+        avatarEl.outerHTML = "<img src='" + v.foto_url + "' class='vendor-avatar' id='vendorAvatar' alt='" + v.nombre + "'>";
       } else {
         avatarEl.textContent = v.nombre.charAt(0).toUpperCase();
       }
-      document.getElementById('vendorInfo').style.display = 'flex';
+      document.getElementById("vendorInfo").style.display = "flex";
     } else {
-      document.querySelector('.hero-left').innerHTML = '<div style="text-align:center;padding:60px 0"><div style="font-size:64px;margin-bottom:24px">😕</div><h2 style="font-size:28px;font-weight:800;margin-bottom:12px">Vendedor no encontrado</h2><p style="color:#7a6a8a;font-size:16px">El link no es válido o el vendedor no está activo.</p></div>';
-      document.querySelector('.hero-right').style.display = 'none';
+      document.querySelector(".hero-left").innerHTML = "<div style='text-align:center;padding:60px 0'><div style='font-size:64px;margin-bottom:24px'>😕</div><h2 style='font-size:28px;font-weight:800;margin-bottom:12px'>Vendedor no encontrado</h2><p style='color:#7a6a8a;font-size:16px'>El link no es válido o el vendedor no está activo.</p></div>";
+      document.querySelector(".hero-right").style.display = "none";
     }
-  } catch(e) {
-    console.log('vendor load error:', e);
-  }
+  } catch(e) { console.log("vendor error:", e); }
 }
 
-const TYPES = {
+var TYPES = {
   netflix: [
-    { id: 'netflix_hogar', icon: '🏠', cls: 'hogar', name: 'Código Hogar', desc: 'Actualizar ubicación de tu cuenta', summary: 'Código Hogar (Link)' },
-    { id: 'netflix_login', icon: '🔑', cls: 'login', name: 'Inicio de Sesión', desc: 'Código de 4 dígitos para iniciar sesión', summary: 'Inicio de Sesión' },
-    { id: 'netflix_pass', icon: '🔒', cls: 'pass', name: 'Cambiar Contraseña', desc: 'Código de 6 dígitos para restablecer', summary: 'Cambiar Contraseña' },
+    { id: "netflix_hogar", icon: "🏠", cls: "hogar", name: "Código Hogar", desc: "Actualizar ubicación de tu cuenta", summary: "Código Hogar (Link)" },
+    { id: "netflix_login", icon: "🔑", cls: "login", name: "Inicio de Sesión", desc: "Código de 4 dígitos para iniciar sesión", summary: "Inicio de Sesión" },
+    { id: "netflix_pass", icon: "🔒", cls: "pass", name: "Cambiar Contraseña", desc: "Código de 6 dígitos para restablecer", summary: "Cambiar Contraseña" }
   ],
   disney: [
-    { id: 'disney', icon: '✨', cls: 'login', name: 'Inicio de Sesión', desc: 'Código de 4 dígitos para tu cuenta', summary: 'Inicio de Sesión' },
-  ],
+    { id: "disney", icon: "✨", cls: "login", name: "Inicio de Sesión", desc: "Código de 4 dígitos para tu cuenta", summary: "Inicio de Sesión" }
+  ]
 };
 
 function selectService(s) {
   currentService = s;
-  document.querySelectorAll('.service-card').forEach(function(c) { c.classList.remove('selected'); });
-  document.getElementById('svc-' + s).classList.add('selected');
-  document.getElementById('btn1').disabled = false;
+  document.querySelectorAll(".service-card").forEach(function(c) { c.classList.remove("selected"); });
+  document.getElementById("svc-" + s).classList.add("selected");
+  document.getElementById("btn1").disabled = false;
 }
 
 function renderTypes() {
-  const list = document.getElementById('typeList');
-  list.innerHTML = '';
+  var list = document.getElementById("typeList");
+  list.innerHTML = "";
   (TYPES[currentService] || []).forEach(function(t) {
-    list.innerHTML += '<div class="type-card" id="type-' + t.id + '" onclick="selectType('' + t.id + '','' + t.summary + '')"><div class="type-icon ' + t.cls + '">' + t.icon + '</div><div class="type-info"><div class="type-name">' + t.name + '</div><div class="type-desc">' + t.desc + '</div></div><div class="type-radio"></div></div>';
+    var div = document.createElement("div");
+    div.className = "type-card";
+    div.id = "type-" + t.id;
+    div.innerHTML = "<div class='type-icon " + t.cls + "'>" + t.icon + "</div><div class='type-info'><div class='type-name'>" + t.name + "</div><div class='type-desc'>" + t.desc + "</div></div><div class='type-radio'></div>";
+    div.onclick = function() { selectType(t.id, t.summary); };
+    list.appendChild(div);
   });
 }
 
 function selectType(id, summary) {
   currentType = id;
-  document.querySelectorAll('.type-card').forEach(function(c) { c.classList.remove('selected'); });
-  document.getElementById('type-' + id).classList.add('selected');
-  document.getElementById('btn2').disabled = false;
-  document.getElementById('summaryType').textContent = summary;
-  document.getElementById('summaryService').textContent = currentService === 'netflix' ? 'Netflix' : 'Disney+';
+  document.querySelectorAll(".type-card").forEach(function(c) { c.classList.remove("selected"); });
+  document.getElementById("type-" + id).classList.add("selected");
+  document.getElementById("btn2").disabled = false;
+  document.getElementById("summaryType").textContent = summary;
+  document.getElementById("summaryService").textContent = currentService === "netflix" ? "Netflix" : "Disney+";
 }
 
 function validateEmail() {
-  const val = document.getElementById('emailInput').value.trim();
-  document.getElementById('btn3').disabled = !val.includes('@');
-  document.getElementById('emailError').style.display = 'none';
+  var val = document.getElementById("emailInput").value.trim();
+  document.getElementById("btn3").disabled = !val.includes("@");
+  document.getElementById("emailError").style.display = "none";
 }
 
 function goStep(n) {
   for (var i = 1; i <= 4; i++) {
-    document.getElementById('step' + i).classList.remove('active');
-    var sc = document.getElementById('sc' + i);
-    var sl = document.getElementById('sl' + i);
-    if (i < n) { sc.className = 'step-circle done'; sc.textContent = '✓'; sl.className = 'step-label done'; }
-    else if (i === n) { sc.className = 'step-circle active'; sc.textContent = i; sl.className = 'step-label active'; }
-    else { sc.className = 'step-circle pending'; sc.textContent = i; sl.className = 'step-label pending'; }
-    if (i < 4) { document.getElementById('line' + i).className = 'step-line' + (i < n ? ' done' : ''); }
+    document.getElementById("step" + i).classList.remove("active");
+    var sc = document.getElementById("sc" + i);
+    var sl = document.getElementById("sl" + i);
+    if (i < n) { sc.className = "step-circle done"; sc.textContent = "✓"; sl.className = "step-label done"; }
+    else if (i === n) { sc.className = "step-circle active"; sc.textContent = i; sl.className = "step-label active"; }
+    else { sc.className = "step-circle pending"; sc.textContent = i; sl.className = "step-label pending"; }
+    if (i < 4) { document.getElementById("line" + i).className = "step-line" + (i < n ? " done" : ""); }
   }
-  document.getElementById('step' + n).classList.add('active');
+  document.getElementById("step" + n).classList.add("active");
   if (n === 2) renderTypes();
   if (n === 4) {
-    currentEmail = document.getElementById('emailInput').value.trim().toLowerCase();
+    currentEmail = document.getElementById("emailInput").value.trim().toLowerCase();
     fetchCode();
   }
 }
@@ -614,52 +615,50 @@ function startWizard() { goStep(1); }
 function getCode() { goStep(4); }
 
 async function fetchCode() {
-  document.getElementById('loadingBox').style.display = 'flex';
-  document.getElementById('resultBox').style.display = 'none';
-  document.getElementById('errorBox').style.display = 'none';
-
+  document.getElementById("loadingBox").style.display = "flex";
+  document.getElementById("resultBox").style.display = "none";
+  document.getElementById("errorBox").style.display = "none";
   try {
-    var url = API_BASE + '/api/codigo?servicio=' + encodeURIComponent(currentType) + '&correo=' + encodeURIComponent(currentEmail);
-    if (vendorSlug) url += '&slug=' + encodeURIComponent(vendorSlug);
+    var url = API_BASE + "/api/codigo?servicio=" + encodeURIComponent(currentType) + "&correo=" + encodeURIComponent(currentEmail);
+    if (vendorSlug) url += "&slug=" + encodeURIComponent(vendorSlug);
     var res = await fetch(url);
     var data = await res.json();
-    document.getElementById('loadingBox').style.display = 'none';
-
+    document.getElementById("loadingBox").style.display = "none";
     if (data.success) {
       codigoActual = data.valor;
-      document.getElementById('resultBox').style.display = 'block';
-
-      if (data.tipo === 'codigo') {
-        var digits = data.valor.toString().split('');
-        document.getElementById('codeContent').innerHTML = '<div class="code-digits">' + digits.map(function(d) { return '<div class="code-digit">' + d + '</div>'; }).join('') + '</div>';
-        document.getElementById('codeLabel').textContent = currentType === 'disney' ? 'Inicio de Sesión - Disney+' : currentType === 'netflix_login' ? 'Inicio de Sesión - Netflix' : 'Código';
-        document.getElementById('resultTitle').textContent = '¡Tu código está listo!';
-        document.getElementById('resultSub').textContent = 'Usa este código de ' + digits.length + ' dígitos para iniciar sesión.';
-        document.getElementById('btnCopy').textContent = '📋 Copiar código';
-        document.getElementById('howToBox').innerHTML = '<strong>💡 ¿Cómo usar este código?</strong>Ingresa este código en la pantalla de inicio de sesión para acceder a tu cuenta.';
+      document.getElementById("resultBox").style.display = "block";
+      if (data.tipo === "codigo") {
+        var digits = data.valor.toString().split("");
+        var digitsHtml = digits.map(function(d) { return "<div class='code-digit'>" + d + "</div>"; }).join("");
+        document.getElementById("codeContent").innerHTML = "<div class='code-digits'>" + digitsHtml + "</div>";
+        document.getElementById("codeLabel").textContent = currentType === "disney" ? "Inicio de Sesión - Disney+" : "Inicio de Sesión - Netflix";
+        document.getElementById("resultTitle").textContent = "¡Tu código está listo!";
+        document.getElementById("resultSub").textContent = "Usa este código de " + digits.length + " dígitos para iniciar sesión.";
+        document.getElementById("btnCopy").textContent = "📋 Copiar código";
+        document.getElementById("howToBox").innerHTML = "<strong>💡 ¿Cómo usar este código?</strong> Ingresa este código en la pantalla de inicio de sesión.";
       } else {
-        document.getElementById('codeContent').innerHTML = '<div class="code-link">' + data.valor + '</div>';
-        document.getElementById('codeLabel').textContent = 'Código Hogar - Netflix';
-        document.getElementById('resultTitle').textContent = '¡Tu link de Netflix está listo!';
-        document.getElementById('resultSub').textContent = 'Usa este link para acceder a tu cuenta de hogar.';
-        document.getElementById('btnCopy').textContent = '📋 Copiar link';
-        document.getElementById('howToBox').innerHTML = '<strong>💡 ¿Cómo usar este link?</strong>Abre el link en tu navegador e inicia sesión en la sección "Hogar" de tu cuenta Netflix.';
+        document.getElementById("codeContent").innerHTML = "<div class='code-link'>" + data.valor + "</div>";
+        document.getElementById("codeLabel").textContent = "Código Hogar - Netflix";
+        document.getElementById("resultTitle").textContent = "¡Tu link de Netflix está listo!";
+        document.getElementById("resultSub").textContent = "Usa este link para acceder a tu cuenta de hogar.";
+        document.getElementById("btnCopy").textContent = "📋 Copiar link";
+        document.getElementById("howToBox").innerHTML = "<strong>💡 ¿Cómo usar este link?</strong> Abre el link en tu navegador e inicia sesión en la sección Hogar de tu cuenta Netflix.";
       }
     } else {
-      document.getElementById('errorBox').style.display = 'block';
-      document.getElementById('errorMsg').textContent = data.error || 'Error desconocido.';
+      document.getElementById("errorBox").style.display = "block";
+      document.getElementById("errorMsg").textContent = data.error || "Error desconocido.";
     }
   } catch(e) {
-    document.getElementById('loadingBox').style.display = 'none';
-    document.getElementById('errorBox').style.display = 'block';
-    document.getElementById('errorMsg').textContent = 'Error de conexión. Verifica tu internet e intenta de nuevo.';
+    document.getElementById("loadingBox").style.display = "none";
+    document.getElementById("errorBox").style.display = "block";
+    document.getElementById("errorMsg").textContent = "Error de conexión. Verifica tu internet e intenta de nuevo.";
   }
 }
 
 function copyCode() {
   navigator.clipboard.writeText(codigoActual);
-  document.getElementById('btnCopy').textContent = '✅ ¡Copiado!';
-  setTimeout(function() { document.getElementById('btnCopy').textContent = '📋 Copiar código'; }, 2000);
+  document.getElementById("btnCopy").textContent = "✅ ¡Copiado!";
+  setTimeout(function() { document.getElementById("btnCopy").textContent = "📋 Copiar código"; }, 2000);
 }
 
 loadVendor();
