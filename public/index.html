@@ -509,7 +509,7 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:32
 </footer>
 
 <script>
-const API_BASE = 'https://itachiperu.vercel.app/'; // ← Cambia esto
+const API_BASE = 'https://TU-PROYECTO.vercel.app'; // ← Cambia esto
 let currentService = '';
 let currentType = '';
 let currentEmail = '';
@@ -520,24 +520,44 @@ let codigoActual = '';
 async function loadVendor() {
   const params = new URLSearchParams(window.location.search);
   const slug = params.get('v') || params.get('vendor');
-  if (!slug) return;
+  
+  if (!slug) {
+    // Sin slug: mostrar página de error, no se puede usar sin link del vendedor
+    document.querySelector('.hero-left').innerHTML = `
+      <div style="text-align:center;padding:40px 0;">
+        <div style="font-size:64px;margin-bottom:24px;">🔒</div>
+        <h2 style="font-size:28px;font-weight:800;margin-bottom:12px;">Acceso no válido</h2>
+        <p style="color:var(--muted);font-size:16px;line-height:1.6;">Para acceder a esta plataforma necesitas<br>el link personalizado de tu vendedor.</p>
+      </div>`;
+    document.querySelector('.hero-right').style.display = 'none';
+    return;
+  }
+  
   vendorSlug = slug;
   try {
-    const res = await fetch(`${API_BASE}/api/vendedor-info?slug=${slug}`);
+    const res = await fetch(\`\${API_BASE}/api/vendedor-info?slug=\${slug}\`);
     const data = await res.json();
     if (data.ok && data.vendedor) {
       const v = data.vendedor;
-      document.title = `${v.nombre.toUpperCase()} — ItachiPeru`;
+      document.title = \`\${v.nombre.toUpperCase()} — ItachiPeru\`;
       document.querySelector('.nav-logo').textContent = 'ItachiPeru';
       document.getElementById('vendorName').textContent = v.nombre.toUpperCase();
       document.querySelector(':root').style.setProperty('--vendor-color', v.color || '#ff2d78');
       const avatarEl = document.getElementById('vendorAvatar');
       if (v.foto_url) {
-        avatarEl.outerHTML = `<img src="${v.foto_url}" class="vendor-avatar" id="vendorAvatar" alt="${v.nombre}">`;
+        avatarEl.outerHTML = \`<img src="\${v.foto_url}" class="vendor-avatar" id="vendorAvatar" alt="\${v.nombre}">\`;
       } else {
         avatarEl.textContent = v.nombre.charAt(0).toUpperCase();
       }
       document.getElementById('vendorInfo').style.display = 'flex';
+    } else {
+      document.querySelector('.hero-left').innerHTML = \`
+        <div style="text-align:center;padding:40px 0;">
+          <div style="font-size:64px;margin-bottom:24px;">😕</div>
+          <h2 style="font-size:28px;font-weight:800;margin-bottom:12px;">Vendedor no encontrado</h2>
+          <p style="color:var(--muted);font-size:16px;">El link que usaste no es válido o el vendedor no está activo.</p>
+        </div>\`;
+      document.querySelector('.hero-right').style.display = 'none';
     }
   } catch {}
 }
